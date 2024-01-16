@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class LogicScript : MonoBehaviour
+public class SubmarineLogicScript : MonoBehaviour
 {
-    private int energy;
-    public int maxEnergy;
-    private int[] position;
     public int maxHealth;
+    public int maxEnergy;
+    private int energy;
+    private int[] position;
     private int health;
 
     public int useEnergy(int n) {
