@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: Ocean Tile
+  m_EditorClassIdentifier: 
+  m_AnimatedSprites:
+  - {fileID: 21300000, guid: f6a797699eebe8f4ca29ad95e3396361, type: 3}
+  - {fileID: 21300000, guid: 06ecfbf35de509543875203130da9285, type: 3}
+  - {fileID: 21300000, guid: 1e2834e70cc39b7489d8a99bbb026a64, type: 3}
+  - {fileID: 21300000, guid: 5b2b14b7970743f44b997c532f44f3c5, type: 3}
+  - {fileID: 21300000, guid: db647ffd532fb9747a82c93ff995d338, type: 3}
+  - {fileID: 21300000, guid: 492249de87a4582408933293ea31f4aa, type: 3}
+  - {fileID: 21300000, guid: fb785cd9589c1f24eb69d83567018552, type: 3}
+  - {fileID: 21300000, guid: 19c5906afb699d24eb7f9651e03dd54e, type: 3}
+  - {fileID: 21300000, guid: 93edceefebca9bd49a87eaddd8d8a2a8, type: 3}
+  - {fileID: 21300000, guid: 2e70a3f9e1260d942ad888741bd46010, type: 3}
+  - {fileID: 21300000, guid: bd25a814175144c4495bbe9a7cdeba8c, type: 3}
+  - {fileID: 21300000, guid: 0694a101c6bbec6428a9fe1646b6aacc, type: 3}
+  - {fileID: 21300000, guid: 1668d3273d877e646ace08ec946d04c1, type: 3}
+  - {fileID: 21300000, guid: 33f792052bcb120419da0ce4e47f5c9e, type: 3}
+  - {fileID: 21300000, guid: ba46f6cbcfc181b49b5becbd17c0941e, type: 3}
+  - {fileID: 21300000, guid: 624f89f2490712a45a5a08249a8bb519, type: 3}
+  - {fileID: 21300000, guid: 3adb259703082d4429018458e0bc48fc, type: 3}
+  - {fileID: 21300000, guid: b31afaea85ed019438e98212ce995c8b, type: 3}
+  - {fileID: 21300000, guid: cd4c9393b987dec47852ca4b7b6d59bc, type: 3}
+  - {fileID: 21300000, guid: 7ab0e257523779b48a92bc0b11b6d78f, type: 3}
+  - {fileID: 21300000, guid: 8a456d9f3a128374594d24f19a8fde12, type: 3}
+  - {fileID: 21300000, guid: 917545c249d5b7842b76aa279c2655cb, type: 3}
+  - {fileID: 21300000, guid: 6d45bd049b0bbed46a6cbcc14709a2b3, type: 3}
+  - {fileID: 21300000, guid: 0a53513476ea86e4ba1402964e580398, type: 3}
+  - {fileID: 21300000, guid: 06578802edb22ac4990559d4febaf91c, type: 3}
+  - {fileID: 21300000, guid: 6f80cff9dd3d16b4fbb86ba2689085a3, type: 3}
+  - {fileID: 21300000, guid: 2c991aeb36c2cff4ab7a06dbe77101c4, type: 3}
+  - {fileID: 21300000, guid: 190e4c63367d2464ca2eed382ba6ec31, type: 3}
+  - {fileID: 21300000, guid: dee3a6f1aac2db643a79445548d4d0c2, type: 3}
+  - {fileID: 21300000, guid: 2f636079b7763e54a9effaf61bab4e53, type: 3}
+  - {fileID: 21300000, guid: 17b3122e0c475d1439d8cd74e03734c7, type: 3}
+  - {fileID: 21300000, guid: 7c8c5bfcce26bbb499a3283d98a4934e, type: 3}
+  - {fileID: 21300000, guid: d1bda914ec32ec54cac3044781d2ab17, type: 3}
+  - {fileID: 21300000, guid: 703d341dd64bd1b4ea56281ed88699a9, type: 3}
+  - {fileID: 21300000, guid: 94c7a0abae549da4baaed0cdc600c0e0, type: 3}
+  - {fileID: 21300000, guid: 54294c119630e5d488848e15d20505e8, type: 3}
+  - {fileID: 21300000, guid: 52100e1541f80e0439c8e6cb3fea7f7c, type: 3}
+  - {fileID: 21300000, guid: ea96a847e77c550439ae9b2ec3983cae, type: 3}
+  - {fileID: 21300000, guid: 81a3eff463f4d8449a30abd19b7c5d74, type: 3}
+  - {fileID: 21300000, guid: 3d57c078817c1664d84ee71790e5cc1b, type: 3}
+  m_MinSpeed: 1
+  m_MaxSpeed: 1
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
+  m_TileAnimationFlags: 0
