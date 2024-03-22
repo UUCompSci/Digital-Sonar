@@ -11,6 +11,7 @@ public class SubmarineLogicScript : MonoBehaviour
     private int energy;
     private int[] position;
     private int health;
+    private Path path;
 
     public int useEnergy(int n) {
         if (n > energy) {
@@ -36,12 +37,18 @@ public class SubmarineLogicScript : MonoBehaviour
         return position;
     }
 
-    public void updatePosition(int[] newPosition) {
-        position = newPosition;
+    public void updatePosition(int[] move) {
+        position = new int[2] {position[0] + move[0], position[1] + move[1]};
+        path.getTails()[0].addChild(new Path.Node(path.getTails()[0], move));
+        // move object
     }
 
     public int getHealth() {
         return health;
+    }
+
+    public Path getPath() {
+        return path;
     }
 
     public int dealDamage(int damage) {
@@ -52,5 +59,4 @@ public class SubmarineLogicScript : MonoBehaviour
         Console.WriteLine("dealDamage only accepts positive integer values, try again.");
         return maxHealth + 1;
     }
-
 }
