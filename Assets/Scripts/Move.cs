@@ -22,7 +22,7 @@ public class Movement : MonoBehaviour
         
     }
 
-    void Move(SubmarineLogicScript submarine, int range, char direction, bool report) {
+    string Move(SubmarineLogicScript submarine, int range, char direction, bool report) {
         Path path = submarine.getPath();
         int[] move = {range * Convert.ToInt32(direction == 'N') + (-1 * Convert.ToInt32(direction == 'S')), range * Convert.ToInt32(direction == 'E' + (-1 * Convert.ToInt32(direction == 'W')))};
         int[] targetPosition = {submarine.getPosition()[0] + move[0], submarine.getPosition()[1] + move[1]};
@@ -30,10 +30,7 @@ public class Movement : MonoBehaviour
             gameObject.GetComponent<SubmarineLogicScript>().updatePosition(move);
             //trigger animation
         }
-        
-
-
-        
+        return report ? direction.ToString() : "…";
     }
 
     public bool validateMove(int[] targetPosition) {

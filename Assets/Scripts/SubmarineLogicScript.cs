@@ -1,17 +1,24 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 public class SubmarineLogicScript : MonoBehaviour
 {
+    public int movespeed = 5;
+    public Transform movePoint;
     public int maxHealth;
     public int maxEnergy;
     private int energy;
     private int[] position;
     private int health;
     private Path path;
+
+    void Start() {
+        movePoint.parent = null;
+    }
 
     public int useEnergy(int n) {
         if (n > energy) {
@@ -40,7 +47,7 @@ public class SubmarineLogicScript : MonoBehaviour
     public void updatePosition(int[] move) {
         position = new int[2] {position[0] + move[0], position[1] + move[1]};
         path.getTails()[0].addChild(new Path.Node(path.getTails()[0], move));
-        // move object
+        movePoint.position += new Vector3(position[0] + move[0], position[1] + move[1], 0);
     }
 
     public int getHealth() {
