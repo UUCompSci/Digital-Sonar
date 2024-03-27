@@ -17,7 +17,7 @@ public class Movement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Tilemap tilemap = gameboard.GetComponent<Tilemap>();
     }
 
     // Update is called once per frame
@@ -26,15 +26,14 @@ public class Movement : MonoBehaviour
         
     }
 
-    string Move(SubmarineLogicScript submarine, int range, char direction, bool report) {
-        Path path = submarine.getPath();
-        int[] move = {range * Convert.ToInt32(direction == 'N') + (-1 * Convert.ToInt32(direction == 'S')), range * Convert.ToInt32(direction == 'E' + (-1 * Convert.ToInt32(direction == 'W')))};
-        int[] targetPosition = {submarine.getPosition()[0] + move[0], submarine.getPosition()[1] + move[1]};
+    int Move(SubmarineLogicScript submarine, int range, int[] move, bool report) {
+        int[] targetPosition = {submarine.getPosition()[0] + move[0] * range, submarine.getPosition()[1] + move[1] * range};
         if (validateMove(targetPosition)) {
-            gameObject.GetComponent<SubmarineLogicScript>().updatePosition(move);
-            //trigger animation
+            gameObject.GetComponent<SubmarineLogicScript>().updatePosition(move, report);
+            // prompt animation
         }
-        return report ? direction.ToString() : "…";
+        int direction = move[0] + (move[0] / 2) + move[1] / 2 * 2;
+        return report ? direction : -1;
     }
 
     public bool validateMove(int[] targetPosition) {
@@ -44,14 +43,14 @@ public class Movement : MonoBehaviour
 
     void displayMoveOptions(int range) {
         int[] position = GetComponent<SubmarineLogicScript>().getPosition();
-        for (int n = 0; n <= 3; n++) {
-            Console.WriteLine(n);
-            for (int i = 1; i <= range; i++) {
+        for (int move = 0; move <= 3; move++) {
+            Console.WriteLine(move);
+            for (int distance = 1; distance <= range; distance++) {
                 int[] targetPosition = 
-                    {position[0] + ((-1)^(n % 2)) * (((n / 2) + 1) % 2) * i, // uses a mod operation to check for the sign and floor division (inverted by adding 1 and taking the mod 2) to check if the direction is supposed to be horizontal
-                    position[1] + ((-1)^(n % 2)) * (n / 2) * i};
+                    {position[0] + ((-1)^(move / 2)) * (move % 2) * distance, // uses a mod operation to check for the sign and floor division (inverted by adding 1 and taking the mod 2) to check if the direction is supposed to be horizontal
+                    position[1] + ((-1)^(move / 2)) * ((move + 1) % 2) * distance};
                 bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the direction is supposed to be vertical
-                i += range * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
+                distance += range * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {
                     Console.WriteLine("Creating move target at" + targetPosition.ToString());
                     //create move target
@@ -60,4 +59,4 @@ public class Movement : MonoBehaviour
         }
     }
 
-}
+}up csode

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.Rendering;
 
 public class SubmarineLogicScript : MonoBehaviour
@@ -44,10 +45,15 @@ public class SubmarineLogicScript : MonoBehaviour
         return position;
     }
 
-    public void updatePosition(int[] move) {
+    public void updatePosition(int[] move, bool report) {
         position = new int[2] {position[0] + move[0], position[1] + move[1]};
-        path.getTails()[0].addChild(new Path.Node(path.getTails()[0], move));
+        Path.Node parent = path.getTails()[0];
+        parent.addChild(new Path.Node(path.getTails()[0], move));
         movePoint.position += new Vector3(position[0] + move[0], position[1] + move[1], 0);
+        if (report) {
+            int[] lastMove = parent.getMove();
+            path.updateDisplaySimple(lastMove, move, position, parent.getSilenceOut());
+        }
     }
 
     public int getHealth() {
