@@ -15,6 +15,7 @@ public class Grid {
         {2, 5},
         {3, 4} 
     };
+    //get island tilemap
 
     private int maxMeaningfulValue = 4; // The highest value a tile on the grid can meaningfully have
 
@@ -40,6 +41,7 @@ public class Grid {
 
         for (int i = 0; i < numIslandTiles; i++) {
             gridInfo[islands[i, 0] + 1, islands[i, 1] + 1] = 2;
+            // set island tiles at new Vector3Int(islands[i, 0] + 1, islands [i, 1] + 1)
         };
     }
 

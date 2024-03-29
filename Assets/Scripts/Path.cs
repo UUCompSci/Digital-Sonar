@@ -20,9 +20,23 @@ public class Path {
         private bool silenceIn;
         private bool silenceOut;
         private int[] relativePosition;
+        // note to self: add grid for radio operator
         public Node(Node parent, int[] move) {
             this.parent = parent;
             this.move = move;
+            if (parent != null) {
+                int[] temp= {parent.relativePosition[0] + move[0], parent.relativePosition[1] + move[1]};
+                relativePosition = temp;
+            } else {
+                relativePosition = move;
+            }
+            children = new Node[0];
+        }
+
+        public Node(Node parent, int[] move, bool silenceIn) {
+            this.parent = parent;
+            this.move = move;
+            this.silenceIn = silenceIn;
             if (parent != null) {
                 int[] temp= {parent.relativePosition[0] + move[0], parent.relativePosition[1] + move[1]};
                 relativePosition = temp;
@@ -37,6 +51,9 @@ public class Path {
             Array.Copy(children, 0, temp, 0, children.Length);
             temp[children.Length] = child;
             children = temp;
+            if (child.parent in tails) {
+                tails.remove(child.parent);
+            }
         }
         
         public void removeChild(Node child) {
@@ -66,6 +83,14 @@ public class Path {
 
         public bool getSilenceOut() {
             return silenceOut;
+        }
+
+        public bool setSilenceIn(bool silenceIn) {
+            this.silenceIn = silenceIn;
+        }
+
+        public bool setSilenceOut(bool silenceOut) {
+            this.silenceOut = silenceOut;
         }
     }
 
@@ -101,25 +126,25 @@ public class Path {
             collapseBranch(tail.getParent());
         } else {
             tail.getParent().removeChild(tail);
+            branchHead = tail;
         }
     }
 
-    public bool isCollision(int[] position, Node tail) {
-        return isCollisionHelper(tail, position);
+    public bool isCollision(int[] relativePosition, Node tail) {
+        return isCollisionHelper(relativePosition, tail);
     }
 
-    private bool isCollisionHelper(Node node, int[] position) {
-        if (node.getRelativePosition() == position) {
+    private bool isCollisionHelper(int[] relativePosition, Node node) {
+        if (node.getRelativePosition() == relativePosition) {
             return true;
         } else if (node.getParent() == null) {
             return false;
         }
-        return isCollisionHelper(node.getParent(), position);
+        return isCollisionHelper(node.getParent(), relativePosition);
     }
 
     public void updateDisplaySimple(int[] lastMove, int[] move, int[] position, bool fromSilence) {
         int lastMoveInt = lastMove[0] + (lastMove[0] / 2) + lastMove[1] / 2 * 2;
-        int moveInt = move[0] + (move[0] / 2) + move[1] / 2 * 2;
         Tile tile;
         if (lastMove == move) {
             tile = fromSilence ? straightSilenceIn : straight;
@@ -127,10 +152,10 @@ public class Path {
             tile = fromSilence ? cornerSilenceIn : corner;
         }
         tilemap.SetTile(new Vector3Int(position[0], position[1], 0), tile);
-        int shouldFlip = (moveInt + 2 - lastMoveInt) % 4 % 3 % 2; //checks whether the corner is oriented clockwise or counter-clockwise. Counter-clockwise (the default sprite direction) gives 0, and clockwise gives 1
-        int quarterTurns = (4 - ((lastMoveInt + 2) % 4)) % 4; //checks how many counter-clockwise turns it needs from the default 
+        int shouldFlip = (((move[1] + lastMove[0] + 3) % 4) / 3) * (((move[0] - lastMove[1] + 3) % 4) / 3); //checks whether the corner is oriented clockwise or counter-clockwise. Counter-clockwise (the default sprite direction) gives 0, and clockwise gives 1
+        int quarterTurns = (lastMove[0] + 2)(lastMove[0] % 2) + (lastMove[1] + 3) % 4 % 3; //checks how many counter-clockwise turns it needs from the default 
         tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns), Vector3.one));
-        Vector3Int targetPosition = new Vector3Int(position[0] + ((-1)^(moveInt / 2)) * (moveInt % 2), position[1] + ((-1)^(moveInt / 2)) * ((moveInt + 1) % 2), 0);
+        Vector3Int targetPosition = new Vector3Int(position[0] + move[0], position[1] + move[1], 0);
         tilemap.SetTile(targetPosition, endpoint);
         tilemap.SetTransformMatrix(targetPosition, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns), Vector3.one));
     }
