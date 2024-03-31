@@ -32,8 +32,8 @@ public class PlayerController : MonoBehaviour
         int[] move = {targetPosition[0] - Convert.ToInt32(gameObject.transform.position[0]), targetPosition[1] - Convert.ToInt32(gameObject.transform.position[0])};
         if (validateMove(targetPosition)) {
             movePoint.position = new Vector3Int(targetPosition[0], targetPosition[1], 0);
+            submarine.getPath().getTails()[0].addChild(move, false);
         }
-        submarine.getPath().getTails()[0].addChild(move, false);
         return move;
         
     }
@@ -41,15 +41,15 @@ public class PlayerController : MonoBehaviour
     public string Move(SubmarineLogicScript submarine, int[] targetPosition, string report) {
         int[] move = {targetPosition[0] - Convert.ToInt32(gameObject.transform.position[0]), targetPosition[1] - Convert.ToInt32(gameObject.transform.position[0])};
         if (validateMove(targetPosition)) {
-            // prompt animation
+            movePoint.position = new Vector3Int(targetPosition[0], targetPosition[1], 0);
+            submarine.getPath().getTails()[0].addChild(move, true);
         }
-        submarine.getPath().getTails()[0].addChild(move, true);
         return report;
     }
 
     public bool validateMove(int[] targetPosition) {
-        Path path = gameObject.GetComponent<SubmarineLogicScript>().getPath();
-        return !(islandMap.GetTile(new Vector3Int(targetPosition[0], targetPosition[1], 0)) == island|| path.isCollision(targetPosition, path.getTails()[0]));
+        Path path = gameObject.GetComponentInChildren<SubmarineLogicScript>().getPath();
+        return !(islandMap.GetTile(new Vector3Int(targetPosition[0], targetPosition[1], 0)).name == "Island Tile"|| path.isCollision(targetPosition, path.getTails()[0]));
     }
 
     void displayMoveOptions(int range, bool silence) {
@@ -65,11 +65,13 @@ public class PlayerController : MonoBehaviour
                 if (isValid) {
                     Console.WriteLine("Creating move target at" + targetPosition.ToString());
                     if (!silence) {
-                        GameObject tempMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition[0], targetPosition[1], 0), Quaternion.Euler(Vector3.zero));
+                        GameObject tempMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition[0], targetPosition[1], 0), Quaternion.Euler(Vector3.zero), gameObject.transform);
                         tempMoveTarget.GetComponent<ReportMoveTarget>().reportee = reportee;
+                        tempMoveTarget.name = "moveTarget";
                     } else {
-                        GameObject tempSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition[0], targetPosition[1], 0), Quaternion.Euler(Vector3.zero));
+                        GameObject tempSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition[0], targetPosition[1], 0), Quaternion.Euler(Vector3.zero), gameObject.transform);
                         tempSilenceTarget.GetComponent<SilenceMoveTarget>().reportee = reportee;
+                        tempSilenceTarget.name = "silenceTarget";
                     }
                 }
             }

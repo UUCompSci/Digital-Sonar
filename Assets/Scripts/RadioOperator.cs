@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Rendering;
 
-public class RadioOperator
+public class RadioOperator : MonoBehaviour
 {
     Path path;
     
