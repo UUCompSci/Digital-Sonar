@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 
-public class Grid {
-    private int grid_width;
-    private int map_width;
-    private int grid_height;
-    private int map_height;
+public class NumberGrid {
+    private int gridWidth;
+    private int mapWidth;
+    private int gridHeight;
+    private int mapHeight;
     private int[,] gridInfo;
     private static int numIslandTiles;
-    private int[,] islands = new int[2, 2] { 
+    private static int[,] islands = new int[2, 2] { 
         {2, 5},
         {3, 4} 
     };
@@ -19,30 +19,37 @@ public class Grid {
 
     private int maxMeaningfulValue = 4; // The highest value a tile on the grid can meaningfully have
 
-    public Grid(int width, int height) {
-        this.grid_width = width + 2;
-        this.map_width = width;
-        this.grid_height = height + 2;
-        this.map_height = height;
+    public NumberGrid(int width, int height) {
+        this.gridWidth = width + 2;
+        this.mapWidth = width;
+        this.gridHeight = height + 2;
+        this.mapHeight = height;
         // the extra 2 rows and columns enable the application of regular collision logic from islands for map borders as well
 
-        gridInfo = new int[grid_width, grid_height];  
-        for (int row = 0; row < grid_height; row++) {
+        gridInfo = new int[gridWidth, gridHeight];  
+        for (int row = 0; row < gridHeight; row++) {
             gridInfo[row, 0] = 2;
-            gridInfo[row, grid_width - 1] = 2;
+            gridInfo[row, gridWidth - 1] = 2;
         };
 
-        for (int col = 1; col <= map_width; col++) { // smaller loop because the corners have already been set to 1
+        for (int col = 1; col <= mapWidth; col++) { // smaller loop because the corners have already been set to 1
             gridInfo[0, col] = 2;
-            gridInfo[grid_height - 1, col] = 2;
+            gridInfo[gridHeight - 1, col] = 2;
         };
 
         validateIslands(islands);
 
         for (int i = 0; i < numIslandTiles; i++) {
             gridInfo[islands[i, 0] + 1, islands[i, 1] + 1] = 2;
-            // set island tiles at new Vector3Int(islands[i, 0] + 1, islands [i, 1] + 1)
         };
+    }
+
+    public NumberGrid(NumberGrid grid) {
+        this.gridWidth = grid.gridWidth;
+        this.gridHeight = grid.gridHeight;
+        this.mapWidth = grid.mapWidth;
+        this.mapHeight = grid.mapHeight;
+        this.gridInfo = grid.gridInfo;
     }
 
     private bool validateIslands(int[,] islands) {
@@ -55,14 +62,14 @@ public class Grid {
     }
 
     public bool validateRow(int row) {
-        if (row < 0 || row >= map_height) {
+        if (row < 0 || row >= mapHeight) {
             return false;
         };
         return true;
     }
     
     public bool validateColumn(int col) {
-        if (col < 0 || col >= map_width) {
+        if (col < 0 || col >= mapWidth) {
             return false;
         };
         return true;
@@ -105,9 +112,17 @@ public class Grid {
         };
     }
         
+    public void update(int[] relativePosition) {
+        for (int i = 0; i < islands.Length; i++) {
+            if (gridInfo[islands[i, 0] - relativePosition[0] + 1, islands[i, 1] - relativePosition[1] + 1] == 2) {
+                gridInfo[islands[i, 0] - relativePosition[0] + 1, islands[i, 1] - relativePosition[1] + 1] = 1;
+            }
+        }
+    }
+    
     public bool isFull() {
-        for (int x = 1; x <= map_height; x++) {
-            for (int y = 1; y <= map_width; y++) {
+        for (int x = 1; x <= mapHeight; x++) {
+            for (int y = 1; y <= mapWidth; y++) {
                 if (gridInfo[x,y] == 0) {
                     return false;
                 };

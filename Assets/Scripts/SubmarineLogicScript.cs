@@ -48,8 +48,8 @@ public class SubmarineLogicScript : MonoBehaviour
     public void updatePosition(int[] move, bool report) {
         position = new int[2] {position[0] + move[0], position[1] + move[1]};
         Path.Node parent = path.getTails()[0];
-        parent.addChild(new Path.Node(path.getTails()[0], move));
-        movePoint.position += new Vector3(position[0] + move[0], position[1] + move[1], 0);
+        parent.addChild(move, report);
+        movePoint.position = new Vector3(position[0] + move[0], position[1] + move[1], 0);
         if (report) {
             int[] lastMove = parent.getMove();
             path.updateDisplaySimple(lastMove, move, position, parent.getSilenceOut());

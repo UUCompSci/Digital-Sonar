@@ -20,6 +20,8 @@ public class Path {
         private bool silenceIn;
         private bool silenceOut;
         private int[] relativePosition;
+
+        private NumberGrid grid;
         // note to self: add grid for radio operator
         public Node(Node parent, int[] move) {
             this.parent = parent;
@@ -46,14 +48,12 @@ public class Path {
             children = new Node[0];
         }
 
-        public void addChild(Node child) {
+        public void addChild(int[] move, bool silenceIn) {
             Node[] temp = new Node[children.Length + 1];
             Array.Copy(children, 0, temp, 0, children.Length);
-            temp[children.Length] = child;
+            this.silenceOut = silenceIn;
+            temp[children.Length] = new Node(this, move, silenceIn);
             children = temp;
-            if (child.parent in tails) {
-                tails.remove(child.parent);
-            }
         }
         
         public void removeChild(Node child) {
@@ -85,12 +85,19 @@ public class Path {
             return silenceOut;
         }
 
-        public bool setSilenceIn(bool silenceIn) {
+        public void setSilenceIn(bool silenceIn) {
             this.silenceIn = silenceIn;
         }
 
-        public bool setSilenceOut(bool silenceOut) {
+        public void setSilenceOut(bool silenceOut) {
             this.silenceOut = silenceOut;
+        }
+
+        public NumberGrid getGrid() {
+            return grid;
+        }
+        public void setGrid(NumberGrid grid) {
+            this.grid = grid;
         }
     }
 
@@ -126,7 +133,6 @@ public class Path {
             collapseBranch(tail.getParent());
         } else {
             tail.getParent().removeChild(tail);
-            branchHead = tail;
         }
     }
 
@@ -140,7 +146,7 @@ public class Path {
         } else if (node.getParent() == null) {
             return false;
         }
-        return isCollisionHelper(node.getParent(), relativePosition);
+        return isCollisionHelper(relativePosition, node.getParent());
     }
 
     public void updateDisplaySimple(int[] lastMove, int[] move, int[] position, bool fromSilence) {
@@ -152,35 +158,42 @@ public class Path {
             tile = fromSilence ? cornerSilenceIn : corner;
         }
         tilemap.SetTile(new Vector3Int(position[0], position[1], 0), tile);
-        int shouldFlip = (((move[1] + lastMove[0] + 3) % 4) / 3) * (((move[0] - lastMove[1] + 3) % 4) / 3); //checks whether the corner is oriented clockwise or counter-clockwise. Counter-clockwise (the default sprite direction) gives 0, and clockwise gives 1
-        int quarterTurns = (lastMove[0] + 2)(lastMove[0] % 2) + (lastMove[1] + 3) % 4 % 3; //checks how many counter-clockwise turns it needs from the default 
-        tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns), Vector3.one));
+        int quarterTurns = (lastMove[0] + 2) * (lastMove[0] % 2) + (lastMove[1] + 3) % 4 % 3; //checks how many counter-clockwise turns it needs from the default 
+        tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip(lastMove, move), 90 * quarterTurns), Vector3.one));
         Vector3Int targetPosition = new Vector3Int(position[0] + move[0], position[1] + move[1], 0);
         tilemap.SetTile(targetPosition, endpoint);
         tilemap.SetTransformMatrix(targetPosition, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns), Vector3.one));
     }
 
-    public void updateDisplaySplit(int lastMove, int[] moves, int[] position) {
+    public void updateDisplaySplit(int[] lastMove, int[,] moves, int[] position) {
         Tile tile;
-        int shouldFlip = 0;
-        if (!moves.Contains<int>(lastMove)) {
-            tile = forking;
-        } else if (moves.Length == 3) {
+        int shouldFlipBranch = 0;
+        if (moves.Length == 3) {
             tile = threeWay;
+        } else if (!((moves[0,0] == lastMove[0] && moves[0, 1] == lastMove[1]) || (moves[1,0] == lastMove[0] && moves[1,1] == lastMove[1]))) {
+            tile = forking;
         } else {
             tile = branching;
-            shouldFlip = (Math.Abs(moves[0] + moves[1] - 2 * lastMove) + 2 - lastMove) % 4 % 3 % 2;
+            shouldFlipBranch = shouldFlip(lastMove, moves);
         }
         tilemap.SetTile(new Vector3Int(position[0], position[1], 0), tile);
-        tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns(lastMove)), Vector3.one));
+        tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * quarterTurns(lastMove)), Vector3.one));
         for (int i = 0; i < moves.Length; i++) {
-            Vector3Int targetPosition = new Vector3Int(position[0] + ((-1)^(moves[i] / 2)) * (moves[i] % 2), position[1] + ((-1)^(moves[i] / 2)) * ((moves[i] + 1) % 2), 0);
+            Vector3Int targetPosition = new Vector3Int(position[0] + moves[i, 0], position[1] + moves[i, 1], 0);
             tilemap.SetTile(targetPosition, silenceEndpoint);
-            tilemap.SetTransformMatrix(targetPosition, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(moves[i])), Vector3.one));
+            tilemap.SetTransformMatrix(targetPosition, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new int[] {moves[i, 0], moves[i, 1]})), Vector3.one));
         }
     }
 
-    public int quarterTurns(int move) {
-        return (4 - ((move + 2) % 4)) % 4;
+    public int quarterTurns(int[] move) {
+        return (move[0] + 2) * (move[0] % 2) + (move[1] + 3) % 4 % 3;
+    }
+
+    public int shouldFlip(int[] lastMove, int[] move) {
+        return (move[1] + lastMove[0] + 3) % 4 / 3 * ((move[0] - lastMove[1] + 3) % 4 / 3); // math based on matrix for clockwise rotation about the origin
+    }
+
+    public int shouldFlip(int[] lastMove, int[,] moves) {
+        return ((moves[0, 1] + lastMove[0] + 3) % 4 / 3 * ((moves[0, 0] - lastMove[1] + 3) % 4 / 3)) + ((moves[1, 1] + lastMove[0] + 3) % 4 / 3 * ((moves[1, 0] - lastMove[1] + 3) % 4 / 3)); // math based on matrix for clockwise rotation about the origin
     }
 }
