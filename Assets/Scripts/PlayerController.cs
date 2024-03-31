@@ -25,24 +25,25 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Vector3.MoveTowards(transform.position, movePoint.position, moveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, movePoint.position, gameObject.GetComponentInChildren<SubmarineLogicScript>().moveSpeed * Time.deltaTime);
     }
 
     public int[] Move(SubmarineLogicScript submarine, int[] targetPosition) {
-        int[] move = {targetPosition[0] - submarine.getPosition()[0], targetPosition[1] - submarine.getPosition()[1]};
+        int[] move = {targetPosition[0] - Convert.ToInt32(gameObject.transform.position[0]), targetPosition[1] - Convert.ToInt32(gameObject.transform.position[0])};
         if (validateMove(targetPosition)) {
-            gameObject.GetComponentInChildren<SubmarineLogicScript>().updatePosition(move, true);
             movePoint.position = new Vector3Int(targetPosition[0], targetPosition[1], 0);
         }
+        submarine.getPath().getTails()[0].addChild(move, false);
         return move;
+        
     }
 
     public string Move(SubmarineLogicScript submarine, int[] targetPosition, string report) {
-        int[] move = {targetPosition[0] - submarine.getPosition()[0], targetPosition[1] - submarine.getPosition()[1]};
+        int[] move = {targetPosition[0] - Convert.ToInt32(gameObject.transform.position[0]), targetPosition[1] - Convert.ToInt32(gameObject.transform.position[0])};
         if (validateMove(targetPosition)) {
-            gameObject.GetComponent<SubmarineLogicScript>().updatePosition(move, true);
             // prompt animation
         }
+        submarine.getPath().getTails()[0].addChild(move, true);
         return report;
     }
 
@@ -52,7 +53,7 @@ public class PlayerController : MonoBehaviour
     }
 
     void displayMoveOptions(int range, bool silence) {
-        int[] position = GetComponent<SubmarineLogicScript>().getPosition();
+        int[] position = new int[] {Convert.ToInt32(gameObject.transform.position[0]), Convert.ToInt32(gameObject.transform.position[1])};
         for (int move = 0; move <= 3; move++) {
             Console.WriteLine(move);
             for (int distance = 1; distance <= range; distance++) {

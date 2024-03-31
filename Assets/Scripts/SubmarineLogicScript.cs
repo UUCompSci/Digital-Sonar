@@ -8,12 +8,11 @@ using UnityEngine.Rendering;
 
 public class SubmarineLogicScript : MonoBehaviour
 {
-    public int movespeed = 5;
+    public float moveSpeed = .5f;
     public Transform movePoint;
     public int maxHealth;
     public int maxEnergy;
     private int energy;
-    private int[] position;
     private int health;
     private Path path;
 
@@ -39,21 +38,6 @@ public class SubmarineLogicScript : MonoBehaviour
         } else {
             Console.WriteLine("gainEnergy only accepts positive integer values, try again.");
         };
-    }
-
-    public int[] getPosition() {
-        return position;
-    }
-
-    public void updatePosition(int[] move, bool report) {
-        position = new int[2] {position[0] + move[0], position[1] + move[1]};
-        Path.Node parent = path.getTails()[0];
-        parent.addChild(move, report);
-        movePoint.position = new Vector3(position[0] + move[0], position[1] + move[1], 0);
-        if (report) {
-            int[] lastMove = parent.getMove();
-            path.updateDisplaySimple(lastMove, move, position, parent.getSilenceOut());
-        }
     }
 
     public int getHealth() {

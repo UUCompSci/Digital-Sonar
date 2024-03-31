@@ -7,11 +7,11 @@ using UnityEngine.UIElements;
 
 public class ReportMoveTarget : MonoBehaviour
 {
-    Transform parentTransform;
-    public GameObject submarine;
+
     public RadioOperator reportee;
     public void OnClick() {
-        int[] move = submarine.GetComponent<PlayerController>().Move(submarine.GetComponentInChildren<SubmarineLogicScript>(), new int[] {Convert.ToInt32(parentTransform.position[0]), Convert.ToInt32(parentTransform.position[1])});
+        int[] targetPosition = new int[2] {Convert.ToInt32(gameObject.transform.parent.position[0]), Convert.ToInt32(gameObject.transform.parent.position[1])};
+        int[] move = gameObject.transform.parent.gameObject.GetComponent<PlayerController>().Move(gameObject.transform.parent.gameObject.GetComponentInChildren<SubmarineLogicScript>(), targetPosition);
         reportee.reportMove(move);
     }
 }
