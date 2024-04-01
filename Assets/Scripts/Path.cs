@@ -12,7 +12,7 @@ using UnityEngine.Animations;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
-public class Path : MonoBehaviour{
+public class Path {
     public class Node {
         private Node parent;
         private Node[] children;

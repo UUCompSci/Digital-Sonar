@@ -15,6 +15,9 @@ public class RadioOperator : MonoBehaviour
     int[,] islands;
 
     public int reportMove(int[] move) {
+        if (path == null) {
+            path = new Path(move);
+        }
         Path.Node[] tails = path.getTails();
         int tailsLength = tails.Length;
         for (int i = 0; i < tailsLength; i++) { // for each tail in path.tails

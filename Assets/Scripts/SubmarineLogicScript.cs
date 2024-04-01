@@ -14,6 +14,7 @@ public class SubmarineLogicScript : MonoBehaviour
     public int maxEnergy;
     private int energy;
     private int health;
+    private Path path = null;
 
     void Start() {
         movePoint.parent = null;
@@ -43,8 +44,11 @@ public class SubmarineLogicScript : MonoBehaviour
         return health;
     }
 
+    public void setPath(int[] move) {
+        this.path = new Path(move);
+    }
     public Path getPath() {
-        return gameObject.GetComponentInChildren<Path>();
+        return path;
     }
 
     public int dealDamage(int damage) {
