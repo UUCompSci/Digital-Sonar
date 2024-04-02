@@ -11,7 +11,7 @@ public class SilenceMoveTarget : MonoBehaviour
     public RadioOperator reportee;
     public void OnClick() {
         Console.WriteLine(gameObject.name);
-        int[] targetPosition = {Convert.ToInt32(gameObject.transform.position[0]), Convert.ToInt32(gameObject.transform.position[1])};
+        Vector2Int targetPosition = new Vector2Int((int)gameObject.transform.position[0], (int)gameObject.transform.position[1]);
         Console.WriteLine("target position: " + targetPosition);
         string move = gameObject.transform.parent.parent.gameObject.GetComponent<PlayerController>().Move(gameObject.transform.parent.parent.gameObject.GetComponentInChildren<SubmarineLogicScript>(), targetPosition, "...");
         
