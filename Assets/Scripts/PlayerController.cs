@@ -38,14 +38,11 @@ public class PlayerController : MonoBehaviour
 
     public Vector2Int Move(SubmarineLogicScript submarine, Vector2Int targetPosition) {
         Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
-        Debug.Log("Move: " + move);
         if (submarine.getPath() != null) {
             Path.Node[] tails = submarine.getPath().getTails();
             tails[0] = tails[0].addChild(move, false);
-            Debug.Log("Move function adding child");
         } else {
             submarine.setPath(move);
-            Debug.Log("Setting new path");
         }
         movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
         return move;
@@ -66,22 +63,14 @@ public class PlayerController : MonoBehaviour
 
     public bool validateMove(Vector2Int move) {
         Vector2Int targetPosition = new Vector2Int((int)transform.position.x + move.x, (int)transform.position.y + move.y);
-        Debug.Log("ValidateMove Target Position: " + targetPosition.ToString());
-        // bool result1 = !Physics2D.OverlapCircle(new Vector3(targetPosition.x, targetPosition.y, 0), .2f, whatStopsMovement);
-        // Debug.Log("Result from CollisionChecker: " + result1);
         Path path = gameObject.GetComponentInChildren<SubmarineLogicScript>().getPath();
         bool result2 = false;
         if (path != null) {
             Path.Node tail = path.getTails()[0];
-            Debug.Log("Tail.move: " + tail.getMove().ToString());
             result2 = path.isCollision(new Vector2Int(targetPosition.x - path.getStartingPosition().x, targetPosition.y - path.getStartingPosition().y), tail);
-        } else {
-            Debug.Log("First move, no path yet");
         }
-        Debug.Log("Result from Path.isCollision(): " + result2);
         Tile tile = (Tile)islandMap.GetTile(islandMap.WorldToCell(new Vector3Int(targetPosition.x, targetPosition.y, 0)));
         bool result3 = !(result2 || (tile != null && tile == island));
-        Debug.Log("Combined result of island and path checks: " + result3);
         return result3;
     }
 
@@ -95,7 +84,6 @@ public class PlayerController : MonoBehaviour
                 if (!isValid) {
                     dist += moveRange; // ends the loop early on hitting an obstacle
                 } else {
-                    UnityEngine.Debug.Log("Creating move target at" + targetPosition.ToString());
                     GameObject tempMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
                     tempMoveTarget.name = "MoveTarget";
                 }
@@ -112,7 +100,6 @@ public class PlayerController : MonoBehaviour
                 bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the dir is supposed to be vertical
                 dist += silenceRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {
-                    UnityEngine.Debug.Log("Creating move target at" + targetPosition.ToString());
                     GameObject tempSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
                     tempSilenceTarget.name = "silenceTarget";
                 }
