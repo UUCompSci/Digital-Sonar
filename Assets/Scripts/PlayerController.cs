@@ -50,14 +50,13 @@ public class PlayerController : MonoBehaviour
 
     public string Move(SubmarineLogicScript submarine, Vector2Int targetPosition, string report) {
         Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
-        if (validateMove(move)) {
-            movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
-            if (submarine.getPath() != null) {
-                submarine.getPath().getTails()[0].addChild(move, true);
-            } else {
-                submarine.setPath(move);
-            }
+        if (submarine.getPath() != null) {
+            Path.Node[] tails = submarine.getPath().getTails();
+            tails[0] = tails[0].addChild(move, true);
+        } else {
+            submarine.setPath(move);
         }
+        movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
         return report;
     }
 
@@ -81,9 +80,8 @@ public class PlayerController : MonoBehaviour
                 Vector2Int move = new Vector2Int((int)Math.Pow(-1, dir / 2) * (dir % 2) * dist, (int)Math.Pow(-1, dir / 2) * ((dir + 1) % 2) * dist);
                 Vector2Int targetPosition = new Vector2Int(position.x + move.x, position.y + move.y);
                 bool isValid = validateMove(move); 
-                if (!isValid) {
-                    dist += moveRange; // ends the loop early on hitting an obstacle
-                } else {
+                dist += moveRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
+                if (isValid) {
                     GameObject tempMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
                     tempMoveTarget.name = "MoveTarget";
                 }
@@ -92,11 +90,11 @@ public class PlayerController : MonoBehaviour
     }
 
     public void displaySilenceOptions() {
-        Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position.x), Convert.ToInt32(gameObject.transform.position[1]));
-        for (int move = 0; move <= 3; move++) {
-            UnityEngine.Debug.Log(move);
+        Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position.x), Convert.ToInt32(gameObject.transform.position.y));
+        for (int dir = 0; dir <= 3; dir++) {
             for (int dist = 1; dist <= silenceRange; dist++) {
-                Vector2Int targetPosition = new Vector2Int(position.x + (int)Math.Pow(-1, move / 2) * (move % 2) * dist, position.y + (int)Math.Pow(-1, move / 2) * ((move + 1) % 2) * dist);
+                Vector2Int move = new Vector2Int((int)Math.Pow(-1, dir / 2) * (dir % 2) * dist, (int)Math.Pow(-1, dir / 2) * ((dir + 1) % 2) * dist);
+                Vector2Int targetPosition = new Vector2Int(position.x + move.x, position.y + move.y);
                 bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the dir is supposed to be vertical
                 dist += silenceRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {

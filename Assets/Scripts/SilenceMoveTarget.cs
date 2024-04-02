@@ -8,13 +8,12 @@ using UnityEngine.UIElements;
 
 public class SilenceMoveTarget : MonoBehaviour
 {
-    public RadioOperator reportee;
     public void OnClick() {
-        Console.WriteLine(gameObject.name);
+        GameObject submarine = gameObject.GetComponentInParent<SubmarineToken>().submarine;
         Vector2Int targetPosition = new Vector2Int((int)gameObject.transform.position[0], (int)gameObject.transform.position[1]);
-        Console.WriteLine("target position: " + targetPosition);
-        string move = gameObject.transform.parent.parent.gameObject.GetComponent<PlayerController>().Move(gameObject.transform.parent.parent.gameObject.GetComponentInChildren<SubmarineLogicScript>(), targetPosition, "...");
-        
+        string move = submarine.GetComponent<PlayerController>().Move(submarine.GetComponentInChildren<SubmarineLogicScript>(), targetPosition, "...");
+        RadioOperator reportee = GameObject.Find("Game Logic Manager").GetComponent<GameLogicManager>().getOpponentRadioOperator(submarine);
         reportee.reportMove(move);
+        submarine.GetComponent<PlayerController>().clearCanvas();
     }
 }
