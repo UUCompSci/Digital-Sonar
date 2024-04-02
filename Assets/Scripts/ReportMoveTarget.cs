@@ -11,9 +11,9 @@ public class ReportMoveTarget : MonoBehaviour
 {
     public void OnClick() {
         GameObject submarine = transform.parent.gameObject.GetComponent<SubmarineToken>().submarine;
-        int[] targetPosition = new int[2] {Convert.ToInt32(transform.position[0]), Convert.ToInt32(transform.position[1])};
+        Vector2Int targetPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y);
         print(targetPosition.ToString());
-        int[] move = submarine.GetComponent<PlayerController>().Move(submarine.GetComponentInChildren<SubmarineLogicScript>(), targetPosition);
+        Vector2Int move = submarine.GetComponent<PlayerController>().Move(submarine.GetComponentInChildren<SubmarineLogicScript>(), targetPosition);
         print(move.ToString());
         RadioOperator reportee = GameObject.Find("Game Logic Manager").GetComponent<GameLogicManager>().getOpponentRadioOperator(submarine);
         reportee.reportMove(move);

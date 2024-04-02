@@ -11,9 +11,9 @@ public class NumberGrid {
     private int mapHeight;
     private int[,] gridInfo;
     private static int numIslandTiles;
-    private static int[,] islands = new int[2, 2] { 
-        {2, 5},
-        {3, 4} 
+    private static Vector2Int[] islands = new Vector2Int[2] { 
+        new Vector2Int(2, 5),
+        new Vector2Int(3, 4) 
     };
     //get island tilemap
 
@@ -40,7 +40,7 @@ public class NumberGrid {
         validateIslands(islands);
 
         for (int i = 0; i < numIslandTiles; i++) {
-            gridInfo[islands[i, 0] + 1, islands[i, 1] + 1] = 2;
+            gridInfo[islands[i].x + 1, islands[i].y + 1] = 2;
         };
     }
 
@@ -52,9 +52,9 @@ public class NumberGrid {
         this.gridInfo = grid.gridInfo;
     }
 
-    private bool validateIslands(int[,] islands) {
+    private bool validateIslands(Vector2Int[] islands) {
         for (int i = 0; i < numIslandTiles; i++) {
-            if (!(validateRow(islands[i, 0]) && validateColumn(islands[i, 1]))) {
+            if (!(validateRow(islands[i].x) && validateColumn(islands[i].y))) {
                 return false;
             };
         }
@@ -112,10 +112,10 @@ public class NumberGrid {
         };
     }
         
-    public void update(int[] relativePosition) {
+    public void update(Vector2Int relativePosition) {
         for (int i = 0; i < islands.Length; i++) {
-            if (gridInfo[islands[i, 0] - relativePosition[0] + 1, islands[i, 1] - relativePosition[1] + 1] == 2) {
-                gridInfo[islands[i, 0] - relativePosition[0] + 1, islands[i, 1] - relativePosition[1] + 1] = 1;
+            if (gridInfo[islands[i].x - relativePosition.x + 1, islands[i].y - relativePosition.y + 1] == 2) {
+                gridInfo[islands[i].x - relativePosition.x + 1, islands[i].y - relativePosition.y + 1] = 1;
             }
         }
     }

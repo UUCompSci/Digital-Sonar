@@ -12,9 +12,9 @@ public class RadioOperator : MonoBehaviour
 {
     Path path;
     
-    int[,] islands;
+    Vector2Int[] islands;
 
-    public int reportMove(int[] move) {
+    public int reportMove(Vector2Int move) {
         if (path == null) {
             path = new Path(move);
         }
@@ -22,8 +22,8 @@ public class RadioOperator : MonoBehaviour
         int tailsLength = tails.Length;
         for (int i = 0; i < tailsLength; i++) { // for each tail in path.tails
             Path.Node tail = tails[i];
-            int[] oldPosition = tail.getRelativePosition();
-            int[] targetRelativePosition = {oldPosition[0] + move[0], oldPosition[1] + move[1]};
+            Vector2Int oldPosition = tail.getRelativePosition();
+            Vector2Int targetRelativePosition = new Vector2Int(oldPosition[0] + move[0], oldPosition[1] + move[1]);
             bool fullGrid = false;
             if (fullGrid || path.isCollision(targetRelativePosition, tail)) {
                 path.collapseBranch(tail);
@@ -39,13 +39,13 @@ public class RadioOperator : MonoBehaviour
         int tailsLength = tails.Length;
         for (int i = 0; i < tailsLength; i++) {
             Path.Node tail = tails[i];
-            int[] lastMove = tail.getMove();
-            int[,] moveList = {{lastMove[0], lastMove[1]}, {lastMove[1], -lastMove[0]}, {-lastMove[1], lastMove[0]}};
+            Vector2Int lastMove = tail.getMove();
+            Vector2Int[] moveList = new Vector2Int[] {new Vector2Int(lastMove.x, lastMove.y), new Vector2Int(lastMove.y, -lastMove.x), new Vector2Int(-lastMove.y, lastMove.x)};
             bool branchesAdded = false;
             for (int n = 0; n < 3; n++) {
-                int[] move = {moveList[0,0],moveList[0,1]};
-                int[] oldPosition = tail.getRelativePosition();
-                int[] targetRelativePosition = {oldPosition[0] + move[0], oldPosition[1] + move[1]};
+                Vector2Int move = new Vector2Int(moveList[0].x,moveList[0].y);
+                Vector2Int oldPosition = tail.getRelativePosition();
+                Vector2Int targetRelativePosition = new Vector2Int(oldPosition[0] + move[0], oldPosition[1] + move[1]);
                 NumberGrid grid = tail.getGrid();
                 NumberGrid gridCopy = new NumberGrid(grid);
                 gridCopy.update(targetRelativePosition);

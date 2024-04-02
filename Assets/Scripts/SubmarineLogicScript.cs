@@ -44,7 +44,7 @@ public class SubmarineLogicScript : MonoBehaviour
         return health;
     }
 
-    public void setPath(int[] move) {
+    public void setPath(Vector2Int move) {
         this.path = new Path(move);
     }
     public Path getPath() {
