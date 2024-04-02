@@ -36,7 +36,7 @@ public class SubmarineLogicScript : MonoBehaviour
                 energy = maxEnergy;
             };
         } else {
-            Console.WriteLine("gainEnergy only accepts positive integer values, try again.");
+            Debug.Log("gainEnergy only accepts positive integer values, try again.");
         };
     }
 
@@ -45,18 +45,22 @@ public class SubmarineLogicScript : MonoBehaviour
     }
 
     public void setPath(Vector2Int move) {
-        this.path = new Path(move);
+        path = new Path(move, new Vector2Int((int)transform.parent.position.x, (int)transform.parent.position.y));
     }
     public Path getPath() {
         return path;
     }
 
     public int dealDamage(int damage) {
-        if (damage > 0) {
+        if (damage > 0 && damage <= health) {
             health -= damage;
             return health;
-        };
-        Console.WriteLine("dealDamage only accepts positive integer values, try again.");
-        return maxHealth + 1;
+        } else if (damage > 0) {
+            health = 0;
+            return health;
+        } else {
+            Debug.Log("dealDamage only accepts positive integer values, try again.");
+        }
+        return health;
     }
 }

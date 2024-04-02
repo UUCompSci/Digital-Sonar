@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.TerrainTools;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Tilemaps;
@@ -18,7 +20,7 @@ public class PlayerController : MonoBehaviour
     public GameObject silenceTarget;
     public int moveRange;
     public int silenceRange;
-    public LayerMask whatStopsMovement;
+    public int whatStopsMovement;
 
     public Transform canvas;
 
@@ -35,22 +37,23 @@ public class PlayerController : MonoBehaviour
     }
 
     public Vector2Int Move(SubmarineLogicScript submarine, Vector2Int targetPosition) {
-        Vector2Int move = new Vector2Int(targetPosition.x - Convert.ToInt32(gameObject.transform.position[0]), targetPosition.y - Convert.ToInt32(gameObject.transform.position[0]));
-        if (validateMove(targetPosition)) {
-            movePoint.position = new Vector3Int(targetPosition[0], targetPosition[1], 0);
-            if (submarine.getPath() != null) {
-                submarine.getPath().getTails()[0].addChild(move, false);
-            } else {
-                submarine.setPath(move);
-            }
+        Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
+        Debug.Log("Move: " + move);
+        if (submarine.getPath() != null) {
+            Path.Node[] tails = submarine.getPath().getTails();
+            tails[0] = tails[0].addChild(move, false);
+            Debug.Log("Move function adding child");
+        } else {
+            submarine.setPath(move);
+            Debug.Log("Setting new path");
         }
+        movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
         return move;
-        
     }
 
     public string Move(SubmarineLogicScript submarine, Vector2Int targetPosition, string report) {
-        Vector2Int move = new Vector2Int(targetPosition.x - Convert.ToInt32(gameObject.transform.position[0]), targetPosition.y - Convert.ToInt32(gameObject.transform.position[0]));
-        if (validateMove(targetPosition)) {
+        Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
+        if (validateMove(move)) {
             movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
             if (submarine.getPath() != null) {
                 submarine.getPath().getTails()[0].addChild(move, true);
@@ -61,41 +64,56 @@ public class PlayerController : MonoBehaviour
         return report;
     }
 
-    public bool validateMove(Vector2 targetPosition) {
-        return !Physics2D.OverlapCircle(new Vector3(targetPosition[0], targetPosition[1], 0), .2f, whatStopsMovement);
+    public bool validateMove(Vector2Int move) {
+        Vector2Int targetPosition = new Vector2Int((int)transform.position.x + move.x, (int)transform.position.y + move.y);
+        Debug.Log("ValidateMove Target Position: " + targetPosition.ToString());
+        // bool result1 = !Physics2D.OverlapCircle(new Vector3(targetPosition.x, targetPosition.y, 0), .2f, whatStopsMovement);
+        // Debug.Log("Result from CollisionChecker: " + result1);
+        Path path = gameObject.GetComponentInChildren<SubmarineLogicScript>().getPath();
+        bool result2 = false;
+        if (path != null) {
+            Path.Node tail = path.getTails()[0];
+            Debug.Log("Tail.move: " + tail.getMove().ToString());
+            result2 = path.isCollision(new Vector2Int(targetPosition.x - path.getStartingPosition().x, targetPosition.y - path.getStartingPosition().y), tail);
+        } else {
+            Debug.Log("First move, no path yet");
+        }
+        Debug.Log("Result from Path.isCollision(): " + result2);
+        Tile tile = (Tile)islandMap.GetTile(islandMap.WorldToCell(new Vector3Int(targetPosition.x, targetPosition.y, 0)));
+        bool result3 = !(result2 || (tile != null && tile == island));
+        Debug.Log("Combined result of island and path checks: " + result3);
+        return result3;
     }
 
     public void displayMoveOptions() {
         Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position.x), Convert.ToInt32(gameObject.transform.position.y));
-        for (int move = 0; move <= 3; move++) {
-            UnityEngine.Debug.Log(move.ToString());
-            for (int distance = 1; distance <= moveRange; distance++) {
-                Vector2Int targetPosition = new Vector2Int(position.x + (int)Math.Pow(-1, move / 2) * (move % 2) * distance, position.y + (int)Math.Pow(-1, move / 2) * ((move + 1) % 2) * distance);
-                bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the direction is supposed to be vertical
+        for (int dir = 0; dir <= 3; dir++) {
+            for (int dist = 1; dist <= moveRange; dist++) {
+                Vector2Int move = new Vector2Int((int)Math.Pow(-1, dir / 2) * (dir % 2) * dist, (int)Math.Pow(-1, dir / 2) * ((dir + 1) % 2) * dist);
+                Vector2Int targetPosition = new Vector2Int(position.x + move.x, position.y + move.y);
+                bool isValid = validateMove(move); 
                 if (!isValid) {
-                    distance += moveRange; // ends the loop early on hitting an obstacle
+                    dist += moveRange; // ends the loop early on hitting an obstacle
                 } else {
                     UnityEngine.Debug.Log("Creating move target at" + targetPosition.ToString());
                     GameObject tempMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
                     tempMoveTarget.name = "MoveTarget";
                 }
-                UnityEngine.Debug.Log("Distance: " + distance.ToString());
-                UnityEngine.Debug.Log("TargetPosition: " + targetPosition.ToString());
             }
         }
     }
 
     public void displaySilenceOptions() {
-        Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position[0]), Convert.ToInt32(gameObject.transform.position[1]));
+        Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position.x), Convert.ToInt32(gameObject.transform.position[1]));
         for (int move = 0; move <= 3; move++) {
             UnityEngine.Debug.Log(move);
-            for (int distance = 1; distance <= silenceRange; distance++) {
-                Vector2Int targetPosition = new Vector2Int(position.x + (int)Math.Pow(-1, move / 2) * (move % 2) * distance, position.y + (int)Math.Pow(-1, move / 2) * ((move + 1) % 2) * distance);
-                bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the direction is supposed to be vertical
-                distance += silenceRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
+            for (int dist = 1; dist <= silenceRange; dist++) {
+                Vector2Int targetPosition = new Vector2Int(position.x + (int)Math.Pow(-1, move / 2) * (move % 2) * dist, position.y + (int)Math.Pow(-1, move / 2) * ((move + 1) % 2) * dist);
+                bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the dir is supposed to be vertical
+                dist += silenceRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {
                     UnityEngine.Debug.Log("Creating move target at" + targetPosition.ToString());
-                    GameObject tempSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition[0], targetPosition[1], 0), Quaternion.Euler(Vector3.zero), canvas);
+                    GameObject tempSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
                     tempSilenceTarget.name = "silenceTarget";
                 }
             }

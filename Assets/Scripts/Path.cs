@@ -48,12 +48,15 @@ public class Path {
             children = new Node[0];
         }
 
-        public void addChild(Vector2Int move, bool silenceIn) {
+        public Node addChild(Vector2Int move, bool silenceIn) {
+            Debug.Log("Adding child node with move " + move + " to parent node with move " + this.move);
             Node[] temp = new Node[children.Length + 1];
             Array.Copy(children, 0, temp, 0, children.Length);
-            this.silenceOut = silenceIn;
-            temp[children.Length] = new Node(this, move, silenceIn);
+            silenceOut = silenceIn;
+            Node newChild = new Node(this, move, silenceIn);
+            temp[children.Length] = newChild;
             children = temp;
+            return newChild;
         }
         
         public void removeChild(Node child) {
@@ -101,6 +104,7 @@ public class Path {
         }
     }
 
+    private Vector2Int startingPosition;
     private Node head;
     private Node[] tails;
     public Tilemap tilemap;
@@ -118,10 +122,18 @@ public class Path {
     public Tile silenceEndpoint;
 
     public Path(Vector2Int move) {
-        head = new Node(null, move);
-        tails = new Node[1] {head};
+        head = new Node(null, Vector2Int.zero);
+        tails = new Node[1] {new Node(head, move)};
+    }
+    public Path(Vector2Int move, Vector2Int startingPosition) {
+        this.startingPosition = startingPosition;
+        head = new Node(null, Vector2Int.zero);
+        tails = new Node[1] {new Node(head, move)};
     }
 
+    public Vector2Int getStartingPosition() {
+        return startingPosition;
+    }
     public Node[] getTails() {
         return tails;
     }
@@ -137,15 +149,19 @@ public class Path {
     }
 
     public bool isCollision(Vector2Int relativePosition, Node tail) {
+        Debug.Log("Checking for nodes with relativePosition " + relativePosition);
         return isCollisionHelper(relativePosition, tail);
     }
 
     private bool isCollisionHelper(Vector2Int relativePosition, Node node) {
         if (node.getRelativePosition() == relativePosition) {
+            Debug.Log("Node at relative position " + relativePosition + " found");
             return true;
         } else if (node.getParent() == null) {
+            Debug.Log("Head reached, no collisions found!");
             return false;
         }
+        Debug.Log("Node with move " + node.getMove() + " has relative position " + node.getRelativePosition());
         return isCollisionHelper(relativePosition, node.getParent());
     }
 
