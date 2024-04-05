@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.Rendering;
+using UnityEngine.Tilemaps;
 
 public class SubmarineLogicScript : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class SubmarineLogicScript : MonoBehaviour
     private int energy;
     private int health;
     private Path path = null;
+    public EnergyGauge energyGauge;
+
+    [SerializeField]
+    private Tilemap pathTilemap;
 
     void Start() {
         movePoint.parent = null;
@@ -25,16 +30,18 @@ public class SubmarineLogicScript : MonoBehaviour
             return -1;
         } else {
             energy -= n;
+            energyGauge.displayEnergyLoss(n);
             return energy;
         };
     }
 
     public void gainEnergy(int n) {
+        if (n > maxEnergy - energy) {
+            n = maxEnergy - energy;
+        }
         if (n > 0) {
             energy += n;
-            if (energy > maxEnergy) {
-                energy = maxEnergy;
-            };
+            energyGauge.displayEnergyGain(n);
         } else {
             Debug.Log("gainEnergy only accepts positive integer values, try again.");
         };
@@ -45,7 +52,7 @@ public class SubmarineLogicScript : MonoBehaviour
     }
 
     public void setPath(Vector2Int move) {
-        path = new Path(move, new Vector2Int((int)transform.parent.position.x, (int)transform.parent.position.y));
+        path = new Path(move, new Vector2Int((int)transform.parent.position.x, (int)transform.parent.position.y), pathTilemap);
     }
     public Path getPath() {
         return path;

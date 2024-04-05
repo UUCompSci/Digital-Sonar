@@ -10,20 +10,30 @@ public class NumberGrid {
     private int gridHeight;
     private int mapHeight;
     private int[,] gridInfo;
-    private static int numIslandTiles;
-    private static Vector2Int[] islands = new Vector2Int[2] { 
-        new Vector2Int(2, 5),
-        new Vector2Int(3, 4) 
+    private int numIslandTiles;
+    private static Vector2Int[] islands = new Vector2Int[] { 
+        new Vector2Int(2, 3),
+        new Vector2Int(2, 7),
+        new Vector2Int(3, 5),
+        new Vector2Int(3, 9),
+        new Vector2Int(4, 2),
+        new Vector2Int(5, 7),
+        new Vector2Int(6, 2),
+        new Vector2Int(6, 5),
+        new Vector2Int(6, 9),
+        new Vector2Int(7, 6),
+        new Vector2Int(8, 3),
+        new Vector2Int(9, 8),
     };
-    //get island tilemap
+    private GameLogicManager gameLogicManager = GameObject.Find("Game Logic Manager").GetComponent<GameLogicManager>();
 
     private int maxMeaningfulValue = 4; // The highest value a tile on the grid can meaningfully have
 
-    public NumberGrid(int width, int height) {
-        this.gridWidth = width + 2;
-        this.mapWidth = width;
-        this.gridHeight = height + 2;
-        this.mapHeight = height;
+    public NumberGrid() {
+        mapWidth = gameLogicManager.mapWidth;
+        gridWidth = mapWidth + 2;
+        mapHeight = gameLogicManager.mapHeight;
+        gridHeight = mapHeight + 2;
         // the extra 2 rows and columns enable the application of regular collision logic from islands for map borders as well
 
         gridInfo = new int[gridWidth, gridHeight];  
@@ -50,6 +60,10 @@ public class NumberGrid {
         this.mapWidth = grid.mapWidth;
         this.mapHeight = grid.mapHeight;
         this.gridInfo = grid.gridInfo;
+    }
+
+    public static void setIslands(Vector2Int[] islands) {
+        NumberGrid.islands = islands;
     }
 
     private bool validateIslands(Vector2Int[] islands) {
@@ -113,7 +127,7 @@ public class NumberGrid {
     }
         
     public void update(Vector2Int relativePosition) {
-        for (int i = 0; i < islands.Length; i++) {
+        for (int i = 0; i < numIslandTiles; i++) {
             if (gridInfo[islands[i].x - relativePosition.x + 1, islands[i].y - relativePosition.y + 1] == 2) {
                 gridInfo[islands[i].x - relativePosition.x + 1, islands[i].y - relativePosition.y + 1] = 1;
             }

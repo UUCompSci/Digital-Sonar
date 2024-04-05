@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using Unity.VisualScripting;
+using UnityEditor.Animations;
 using UnityEditor.Rendering;
 using UnityEditor.UI;
 using UnityEditor.VersionControl;
@@ -20,15 +21,12 @@ public class Path {
         private bool silenceIn;
         private bool silenceOut;
         private Vector2Int relativePosition;
-
         private NumberGrid grid;
-        // note to self: add grid for radio operator
         public Node(Node parent, Vector2Int move) {
             this.parent = parent;
             this.move = move;
             if (parent != null) {
-                Vector2Int temp= new Vector2Int(parent.relativePosition.x + move.x, parent.relativePosition.y + move.y);
-                relativePosition = temp;
+                relativePosition = new Vector2Int(parent.relativePosition.x + move.x, parent.relativePosition.y + move.y);
             } else {
                 relativePosition = move;
             }
@@ -40,8 +38,19 @@ public class Path {
             this.move = move;
             this.silenceIn = silenceIn;
             if (parent != null) {
-                Vector2Int temp= new Vector2Int(parent.relativePosition.x + move.x, parent.relativePosition.y + move.y);
-                relativePosition = temp;
+                relativePosition = new Vector2Int(parent.relativePosition.x + move.x, parent.relativePosition.y + move.y);
+            } else {
+                relativePosition = move;
+            }
+            children = new Node[0];
+        }
+
+        public Node(Node parent, Vector2Int move, NumberGrid grid, bool silenceIn) {
+            this.parent = parent;
+            this.move = move;
+            this.silenceIn = silenceIn;
+            if (parent != null) {
+                relativePosition = new Vector2Int(parent.relativePosition.x + move.x, parent.relativePosition.y + move.y);
             } else {
                 relativePosition = move;
             }
@@ -50,18 +59,14 @@ public class Path {
 
         public Node addChild(Vector2Int move, bool silenceIn) {
             Debug.Log("Adding child node with move " + move + " to parent node with move " + this.move);
-            Node[] temp = new Node[children.Length + 1];
-            Array.Copy(children, 0, temp, 0, children.Length);
-            silenceOut = silenceIn;
             Node newChild = new Node(this, move, silenceIn);
-            temp[children.Length] = newChild;
-            children = temp;
+            children = children.Concat(new Node[] {newChild}).ToArray();
+            silenceOut = silenceIn;
             return newChild;
         }
         
         public void removeChild(Node child) {
-            Node[] temp = new Node[children.Length - 1];
-            temp = children.Where(val => val != child).ToArray();
+            children = children.Where(val => val != child).ToArray();
         }
 
         public Node getParent() {
@@ -121,19 +126,45 @@ public class Path {
     public Tile cornerSilenceOut;
     public Tile silenceEndpoint;
 
-    public Path(Vector2Int move) {
+    public Path(Vector2Int move, Tilemap tilemap) {
         head = new Node(null, Vector2Int.zero);
         tails = new Node[1] {new Node(head, move)};
+        this.tilemap = tilemap;
     }
-    public Path(Vector2Int move, Vector2Int startingPosition) {
+    public Path(Vector2Int move, Vector2Int startingPosition, Tilemap tilemap) {
         this.startingPosition = startingPosition;
         head = new Node(null, Vector2Int.zero);
         tails = new Node[1] {new Node(head, move)};
+        this.tilemap = tilemap;
     }
 
     public Vector2Int getStartingPosition() {
         return startingPosition;
     }
+
+    public void removeTail(Node tail) {
+        tail.getParent().removeChild(tail);
+        tails = tails.Where(var => var != tail).ToArray(); 
+    }
+
+    public Node extendTail(int i, Vector2Int move, bool silenceIn) {
+        tails[i] = tails[i].addChild(move, silenceIn);
+        return tails[i];
+    }
+
+    public Node[] extendTail(int tailsIndex, Vector2Int[] moves) {
+        Node[] newTails = {};
+        for (int i = 0; i < moves.Length; i++) {
+            newTails.Concat(new Node[] {tails[tailsIndex].addChild(moves[i], true)});
+        }
+        tails = tails.Where(var => var != tails[tailsIndex]).ToArray();
+        return newTails;
+    }
+    
+    public void setTails(Node[] tails) {
+        this.tails = tails;
+    }
+
     public Node[] getTails() {
         return tails;
     }
@@ -144,7 +175,7 @@ public class Path {
         } else if (tail.getParent().getChildren().Length <= 1) {
             collapseBranch(tail.getParent());
         } else {
-            tail.getParent().removeChild(tail);
+            removeTail(tail);
         }
     }
 
@@ -165,51 +196,69 @@ public class Path {
         return isCollisionHelper(relativePosition, node.getParent());
     }
 
-    public void updateDisplaySimple(Vector2Int lastMove, Vector2Int move, Vector2Int position, bool fromSilence) {
-        int lastMoveInt = lastMove[0] + (lastMove[0] / 2) + lastMove[1] / 2 * 2;
-        Tile tile;
-        if (lastMove == move) {
-            tile = fromSilence ? straightSilenceIn : straight;
-        } else {
-            tile = fromSilence ? cornerSilenceIn : corner;
-        }
-        tilemap.SetTile(new Vector3Int(position[0], position[1], 0), tile);
-        int quarterTurns = (lastMove[0] + 2) * (lastMove[0] % 2) + (lastMove[1] + 3) % 4 % 3; //checks how many counter-clockwise turns it needs from the default 
-        tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip(lastMove, move), 90 * quarterTurns), Vector3.one));
-        Vector3Int targetPosition = new Vector3Int(position[0] + move[0], position[1] + move[1], 0);
-        tilemap.SetTile(targetPosition, endpoint);
-        tilemap.SetTransformMatrix(targetPosition, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns), Vector3.one));
+    public void updateDisplay(Vector2Int move, Vector2Int position) {
+        tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), start);
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
+        Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
+        tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpoint);
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
     }
 
-    public void updateDisplaySplit(Vector2Int lastMove, Vector2Int[] moves, Vector2Int position) {
+    public void updateDisplay(Vector2Int lastMove, Vector2Int move, Vector2Int position, bool fromSilence, bool toSilence) {
+        Tile tile;
+        if (lastMove == move) {
+            if (fromSilence) {
+                tile = straightSilenceIn;
+            } else if (toSilence) {
+                tile = straightSilenceOut;
+            } else {
+                tile = straight;
+            }
+        } else {
+            if (fromSilence) {
+                tile = cornerSilenceIn;
+            } else if (toSilence) {
+                tile = cornerSilenceOut;
+            } else {
+                tile = corner;
+            }
+        }
+        tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip(lastMove, move), 90 * quarterTurns(lastMove)), Vector3.one));
+        Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
+        tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpoint);
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
+    }
+
+    public void updateDisplay(Vector2Int lastMove, Vector2Int[] moves, Vector2Int position, bool fromSilence) {
         Tile tile;
         int shouldFlipBranch = 0;
         if (moves.Length == 3) {
             tile = threeWay;
-        } else if (!((moves[0].x == lastMove[0] && moves[0].y == lastMove[1]) || (moves[1].x == lastMove[0] && moves[1].y == lastMove[1]))) {
+        } else if (!((moves[0].x == lastMove.x && moves[0].y == lastMove.y) || (moves[1].x == lastMove.x && moves[1].y == lastMove.y))) {
             tile = forking;
         } else {
             tile = branching;
             shouldFlipBranch = shouldFlip(lastMove, moves);
         }
-        tilemap.SetTile(new Vector3Int(position[0], position[1], 0), tile);
-        tilemap.SetTransformMatrix(new Vector3Int(position[0], position[1], 0), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * quarterTurns(lastMove)), Vector3.one));
+        tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * quarterTurns(lastMove)), Vector3.one));
         for (int i = 0; i < moves.Length; i++) {
-            Vector3Int targetPosition = new Vector3Int(position[0] + moves[i].x, position[1] + moves[i].y, 0);
-            tilemap.SetTile(targetPosition, silenceEndpoint);
-            tilemap.SetTransformMatrix(targetPosition, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(moves[i].x, moves[i].y))), Vector3.one));
+            Vector3Int targetPosition = new Vector3Int(position.x + moves[i].x, position.y + moves[i].y, 0);
+            tilemap.SetTile(tilemap.WorldToCell(targetPosition), silenceEndpoint);
+            tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(moves[i].x, moves[i].y))), Vector3.one));
         }
     }
 
     public int quarterTurns(Vector2Int move) {
-        return (move[0] + 2) * (move[0] % 2) + (move[1] + 3) % 4 % 3;
+        return (move.x + 2) * (move.x % 2) + (move.y + 3) % 4 % 3;
     }
 
     public int shouldFlip(Vector2Int lastMove, Vector2Int move) {
-        return (move[1] + lastMove[0] + 3) % 4 / 3 * ((move[0] - lastMove[1] + 3) % 4 / 3); // math based on matrix for clockwise rotation about the origin
+        return (move.y + lastMove.x + 3) % 4 / 3 * ((move.x - lastMove.y + 3) % 4 / 3); // math based on matrix for clockwise rotation about the origin
     }
 
     public int shouldFlip(Vector2Int lastMove, Vector2Int[] moves) {
-        return ((moves[0].y + lastMove[0] + 3) % 4 / 3 * ((moves[0].x - lastMove[1] + 3) % 4 / 3)) + ((moves[1].y + lastMove[0] + 3) % 4 / 3 * ((moves[1].x - lastMove[1] + 3) % 4 / 3)); // math based on matrix for clockwise rotation about the origin
+        return ((moves[0].y + lastMove.x + 3) % 4 / 3 * ((moves[0].x - lastMove.y + 3) % 4 / 3)) + ((moves[1].y + lastMove.x + 3) % 4 / 3 * ((moves[1].x - lastMove.y + 3) % 4 / 3)); // math based on matrix for clockwise rotation about the origin
     }
 }

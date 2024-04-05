@@ -15,19 +15,19 @@ public class PlayerController : MonoBehaviour
     public Tilemap islandMap;
     public Tile island;
     public float moveSpeed;
-    public RadioOperator reportee;
     public GameObject moveTarget;
     public GameObject silenceTarget;
     public int moveRange;
     public int silenceRange;
     public int whatStopsMovement;
-
     public Transform canvas;
+    public GameLogicManager gameLogicManager;
 
     // Start is called before the first frame update
     void Start()
     {
         movePoint.parent = null;
+        gameLogicManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
     }
 
     // Update is called once per frame
@@ -40,9 +40,11 @@ public class PlayerController : MonoBehaviour
         Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
         if (submarine.getPath() != null) {
             Path.Node[] tails = submarine.getPath().getTails();
-            tails[0] = tails[0].addChild(move, false);
+            submarine.getPath().extendTail(0, move, false);
+            submarine.getPath().updateDisplay(tails[0].getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), false);
         } else {
             submarine.setPath(move);
+            submarine.getPath().updateDisplay(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
         }
         movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
         return move;
@@ -52,9 +54,11 @@ public class PlayerController : MonoBehaviour
         Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
         if (submarine.getPath() != null) {
             Path.Node[] tails = submarine.getPath().getTails();
-            tails[0] = tails[0].addChild(move, true);
+            submarine.getPath().extendTail(0, move, true);
+            submarine.getPath().updateDisplay(tails[0].getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), true);
         } else {
             submarine.setPath(move);
+            submarine.getPath().updateDisplay(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
         }
         movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
         return report;
@@ -82,8 +86,8 @@ public class PlayerController : MonoBehaviour
                 bool isValid = validateMove(move); 
                 dist += moveRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {
-                    GameObject tempMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
-                    tempMoveTarget.name = "MoveTarget";
+                    GameObject newMoveTarget = Instantiate(moveTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
+                    newMoveTarget.name = "MoveTarget";
                 }
             }
         }
@@ -98,8 +102,8 @@ public class PlayerController : MonoBehaviour
                 bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the dir is supposed to be vertical
                 dist += silenceRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {
-                    GameObject tempSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
-                    tempSilenceTarget.name = "silenceTarget";
+                    GameObject newSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
+                    newSilenceTarget.name = "silenceTarget";
                 }
             }
         }
