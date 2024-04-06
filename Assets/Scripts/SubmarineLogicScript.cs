@@ -47,6 +47,10 @@ public class SubmarineLogicScript : MonoBehaviour
         };
     }
 
+    public int getEnergy() {
+        return energy;
+    }
+
     public int getHealth() {
         return health;
     }
