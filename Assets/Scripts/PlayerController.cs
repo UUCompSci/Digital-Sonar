@@ -1,13 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
+using System.Linq;
+using TMPro;
+using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.TerrainTools;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -22,12 +28,21 @@ public class PlayerController : MonoBehaviour
     public int whatStopsMovement;
     public Transform canvas;
     public GameLogicManager gameLogicManager;
+    public RadioOperator reportee;
+    public GameObject minePrefab;
+    public Canvas classicSonarPrompt;
+    public Canvas torpedoMenu;
+
 
     // Start is called before the first frame update
     void Start()
     {
-        movePoint.parent = null;
+        movePoint.SetParent(null);
         gameLogicManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
+        reportee = gameLogicManager.getOpponentRadioOperator(this.gameObject);
+        classicSonarPrompt.gameObject.transform.SetParent(null);
+        torpedoMenu.gameObject.transform.SetParent(null);
+
     }
 
     // Update is called once per frame
@@ -38,7 +53,7 @@ public class PlayerController : MonoBehaviour
 
     public Vector2Int Move(SubmarineLogicScript submarine, Vector2Int targetPosition) {
         Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
-        if (submarine.getPath() != null) {
+        if (submarine.getPath().nodeCount != 0) {
             Path.Node[] tails = submarine.getPath().getTails();
             submarine.getPath().extendTail(0, move, false);
             submarine.getPath().updateDisplay(tails[0].getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), false);
@@ -52,7 +67,7 @@ public class PlayerController : MonoBehaviour
 
     public string Move(SubmarineLogicScript submarine, Vector2Int targetPosition, string report) {
         Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
-        if (submarine.getPath() != null) {
+        if (submarine.getPath().nodeCount != 0) {
             Path.Node[] tails = submarine.getPath().getTails();
             submarine.getPath().extendTail(0, move, true);
             submarine.getPath().updateDisplay(tails[0].getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), true);
@@ -66,9 +81,9 @@ public class PlayerController : MonoBehaviour
 
     public bool validateMove(Vector2Int move) {
         Vector2Int targetPosition = new Vector2Int((int)transform.position.x + move.x, (int)transform.position.y + move.y);
-        Path path = gameObject.GetComponentInChildren<SubmarineLogicScript>().getPath();
+        Path path = gameObject.GetComponentInChildren<Path>();
         bool result2 = false;
-        if (path != null) {
+        if (path.nodeCount != 0) {
             Path.Node tail = path.getTails()[0];
             result2 = path.isCollision(new Vector2Int(targetPosition.x - path.getStartingPosition().x, targetPosition.y - path.getStartingPosition().y), tail);
         }
@@ -113,5 +128,45 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < canvas.childCount; i++) {
             Destroy(canvas.GetChild(i).gameObject);
         }
+    }
+
+    public void resolveClassicSonar(int positionType) {
+        switch (positionType) {
+            case 0:
+                reportee.reportClassicSonar((int)transform.position.x, "row");
+                break;
+            case 1:
+                reportee.reportClassicSonar((int)transform.position.y, "column");
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void fireTorpedo(Canvas torpedoMenu) {
+        int xPosition = -1;
+        int yPosition = -1;
+        TMP_InputField row = torpedoMenu.transform.GetChild(2).GetComponent<TMP_InputField>();
+        TMP_InputField col = torpedoMenu.transform.GetChild(1).GetComponent<TMP_InputField>();
+        TMP_Text errorMessage = torpedoMenu.transform.GetChild(3).GetComponent<TMP_Text>();
+        if (Convert.ToInt32(row.text) >= 0 && Convert.ToInt32(row.text) <= gameLogicManager.mapHeight) {
+            xPosition = Convert.ToInt32(row.text);
+        } else {
+            errorMessage.enabled = true;
+            row.text = "";
+        }
+        if ((col.text[0] >= 'a' && col.text[0] <= 'a' + gameLogicManager.mapWidth) || (col.text[0] >= 'A' && col.text[0] <= 'A' + gameLogicManager.mapWidth)) {
+            yPosition = col.text[0];
+        }
+        if (xPosition >= 0 && yPosition >= 0) {
+            errorMessage.transform.parent.gameObject.SetActive(false);
+            GameObject mine = Instantiate(minePrefab, new Vector3(xPosition, yPosition, 0), Quaternion.identity);
+            mine.GetComponent<MineLogicScript>().detonate(gameLogicManager.getOpponent(gameObject).GetComponentInChildren<SubmarineLogicScript>());
+        }
+    }
+
+    public void surface() {
+        gameObject.GetComponentInChildren<SubmarineLogicScript>().clearPath();
+        reportee.reportPosition(new Vector2Int((int)transform.position.x, (int)transform.position.y));
     }
 }

@@ -15,14 +15,15 @@ public class SubmarineLogicScript : MonoBehaviour
     public int maxEnergy;
     private int energy;
     private int health;
-    private Path path = null;
+    private Path path;
     public EnergyGauge energyGauge;
 
     [SerializeField]
     private Tilemap pathTilemap;
 
     void Start() {
-        movePoint.parent = null;
+        movePoint.SetParent(null);
+        path = gameObject.transform.parent.GetComponentInChildren<Path>();
     }
 
     public int useEnergy(int n) {
@@ -56,10 +57,52 @@ public class SubmarineLogicScript : MonoBehaviour
     }
 
     public void setPath(Vector2Int move) {
-        path = new Path(move, new Vector2Int((int)transform.parent.position.x, (int)transform.parent.position.y), pathTilemap);
+        Path newPath = path.gameObject.AddComponent<Path>();
+        newPath.tilemap = path.tilemap;
+        newPath.straight = path.straight;
+        newPath.corner = path.corner;
+        newPath.endpoint = path.endpoint;
+        newPath.start = path.start;
+        newPath.threeWay = path.threeWay;
+        newPath.branching = path.branching;
+        newPath.forking = path.forking;
+        newPath.straightSilenceIn = path.straightSilenceIn;
+        newPath.straightSilenceOut = path.straightSilenceOut;
+        newPath.cornerSilenceIn = path.cornerSilenceIn;
+        newPath.cornerSilenceOut = path.cornerSilenceOut;
+        newPath.silenceEndpoint = path.silenceEndpoint;
+        newPath.startPath(move);
+        Destroy(path);
+        path = newPath;
     }
+
+    public void setPath(Vector2Int move, Vector2Int startingPosition) {
+        Path newPath = path.gameObject.AddComponent<Path>();
+        newPath.setStartingPosition(startingPosition);
+        newPath.tilemap = path.tilemap;
+        newPath.straight = path.straight;
+        newPath.corner = path.corner;
+        newPath.endpoint = path.endpoint;
+        newPath.start = path.start;
+        newPath.threeWay = path.threeWay;
+        newPath.branching = path.branching;
+        newPath.forking = path.forking;
+        newPath.straightSilenceIn = path.straightSilenceIn;
+        newPath.straightSilenceOut = path.straightSilenceOut;
+        newPath.cornerSilenceIn = path.cornerSilenceIn;
+        newPath.cornerSilenceOut = path.cornerSilenceOut;
+        newPath.silenceEndpoint = path.silenceEndpoint;
+        newPath.startPath(move);
+        Destroy(path);
+        path = newPath;
+    }
+
     public Path getPath() {
         return path;
+    }
+
+    public void clearPath() {
+        path.clearPath();
     }
 
     public int dealDamage(int damage) {

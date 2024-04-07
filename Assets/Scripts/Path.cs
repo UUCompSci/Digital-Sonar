@@ -13,7 +13,7 @@ using UnityEngine.Animations;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
-public class Path {
+public class Path : MonoBehaviour {
     public class Node {
         private Node parent;
         private Node[] children;
@@ -112,6 +112,7 @@ public class Path {
     private Vector2Int startingPosition;
     private Node head;
     private Node[] tails;
+    public int nodeCount;
     public Tilemap tilemap;
     public Tile straight;
     public Tile corner;
@@ -124,41 +125,50 @@ public class Path {
     public Tile straightSilenceOut;
     public Tile cornerSilenceIn;
     public Tile cornerSilenceOut;
+    private int collapsingBranchSize;
     public Tile silenceEndpoint;
 
-    public Path(Vector2Int move, Tilemap tilemap) {
+    public void startPath(Vector2Int move) {
         head = new Node(null, Vector2Int.zero);
         tails = new Node[1] {new Node(head, move)};
-        this.tilemap = tilemap;
-    }
-    public Path(Vector2Int move, Vector2Int startingPosition, Tilemap tilemap) {
-        this.startingPosition = startingPosition;
-        head = new Node(null, Vector2Int.zero);
-        tails = new Node[1] {new Node(head, move)};
-        this.tilemap = tilemap;
+        nodeCount = 2;
     }
 
     public Vector2Int getStartingPosition() {
         return startingPosition;
     }
 
+    public void setStartingPosition(Vector2Int startingPosition) {
+        this.startingPosition = startingPosition;
+    }
+
     public void removeTail(Node tail) {
         tail.getParent().removeChild(tail);
         tails = tails.Where(var => var != tail).ToArray(); 
+        nodeCount -= 1;
     }
 
     public Node extendTail(int i, Vector2Int move, bool silenceIn) {
         tails[i] = tails[i].addChild(move, silenceIn);
+        nodeCount += 1;
         return tails[i];
+        
     }
 
     public Node[] extendTail(int tailsIndex, Vector2Int[] moves) {
         Node[] newTails = {};
         for (int i = 0; i < moves.Length; i++) {
             newTails.Concat(new Node[] {tails[tailsIndex].addChild(moves[i], true)});
+            nodeCount += 1;
         }
         tails = tails.Where(var => var != tails[tailsIndex]).ToArray();
         return newTails;
+    }
+
+    public void clearPath() {
+        head = null;
+        tails = new Node[] {};
+        nodeCount = 0;
     }
     
     public void setTails(Node[] tails) {
@@ -170,12 +180,28 @@ public class Path {
     }
 
     public void collapseBranch(Node tail) {
+        collapsingBranchSize = 0;
         if (tail.getParent() == null) {
             throw new Exception("Can't collapse a branch on a branchless path.");
         } else if (tail.getParent().getChildren().Length <= 1) {
-            collapseBranch(tail.getParent());
+            collapsingBranchSize += 1;
+            collapseBranchHelper(tail.getParent());
         } else {
+            tail.getParent().removeChild(tail);
             removeTail(tail);
+        }
+    }
+
+    private void collapseBranchHelper(Node tail) {
+        if (tail.getParent() == null) {
+            throw new Exception("Can't collapse a branch on a branchless path.");
+        } else if (tail.getParent().getChildren().Length <= 1) {
+            collapsingBranchSize += 1;
+            collapseBranchHelper(tail.getParent());
+        } else {
+            tail.getParent().removeChild(tail);
+            removeTail(tail);
+            nodeCount -= collapsingBranchSize;
         }
     }
 

@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    GameObject silenceButton;
-    GameObject sonarButton;
-    GameObject torpedoButton;
+    public GameObject silenceButton;
+    public GameObject sonarButton;
+    public GameObject torpedoButton;
 
     
     // Start is called before the first frame update

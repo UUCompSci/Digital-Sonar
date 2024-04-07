@@ -12,10 +12,12 @@ public class MineLogicScript : MonoBehaviour
     public int indirectHitRange;
     
     public int detonate(SubmarineLogicScript enemySubmarine) {
-        if (Math.Abs(gameObject.transform.position[0] - enemySubmarine.gameObject.transform.parent.position[0]) <= directHitRange && Math.Abs(gameObject.transform.position[1] - enemySubmarine.gameObject.transform.parent.position[1]) <= directHitRange) {
+        if (Math.Abs(gameObject.transform.position.x - enemySubmarine.gameObject.transform.parent.position.x) <= directHitRange 
+        && Math.Abs(gameObject.transform.position.y - enemySubmarine.gameObject.transform.parent.position.y) <= directHitRange) {
             Console.WriteLine($"Direct hit! {directHitDamage} damage dealt!");
             return directHitDamage;
-        } else if (Math.Abs(gameObject.transform.position[0] - enemySubmarine.gameObject.transform.parent.position[0]) <= indirectHitRange && Math.Abs(gameObject.transform.position[1] - enemySubmarine.gameObject.transform.parent.position[1]) <= indirectHitRange) {
+        } else if (Math.Abs(gameObject.transform.position.x - enemySubmarine.gameObject.transform.parent.position.x) <= indirectHitRange 
+        && Math.Abs(gameObject.transform.position.y - enemySubmarine.gameObject.transform.parent.position.y) <= indirectHitRange) {
             Console.WriteLine($"Indirect hit! {indirectHitDamage} damage dealt!");
             return indirectHitDamage;
         } else {

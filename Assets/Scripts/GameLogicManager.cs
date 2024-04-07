@@ -72,6 +72,12 @@ public class GameLogicManager : MonoBehaviour
         };
     }
 
+    public void endCurrentTurn(PlayerController opponent) {
+        endCurrentTurn();
+        opponent.gameObject.GetComponentInChildren<Canvas>().enabled = true;
+        
+    }
+
     public void startTurn(int i) {
         PlayerController player = turnList[i];
         SubmarineLogicScript logicScript = player.gameObject.GetComponentInChildren<SubmarineLogicScript>();

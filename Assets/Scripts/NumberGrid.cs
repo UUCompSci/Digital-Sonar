@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class NumberGrid {
     private int gridWidth;
-    private int mapWidth;
+    public int mapWidth;
     private int gridHeight;
-    private int mapHeight;
+    public int mapHeight;
     private int[,] gridInfo;
     private int numIslandTiles;
     private static Vector2Int[] islands = new Vector2Int[] { 
@@ -124,6 +124,26 @@ public class NumberGrid {
                 Console.WriteLine($"Invalid value {value} inputted to Grid.setValue");
             };
         };
+    }
+
+    public void eliminateRow(int row) {
+        if (validateRow(row)) {
+            for (int i = 0; i < mapHeight; i++) {
+                if (gridInfo[row + 1, i + 1] != 2) {
+                    gridInfo[row + 1, i + 1] = 1;
+                }
+            }
+        }
+    }
+    
+    public void eliminateColumn(int col) {
+        if (validateColumn(col)) {
+            for (int i = 0; i < mapHeight; i++) {
+                if (gridInfo[i + 1, col + 1] == 2) {
+                    gridInfo[i + 1, col + 1] = 1;
+                }
+            }
+        }
     }
         
     public void update(Vector2Int relativePosition) {
