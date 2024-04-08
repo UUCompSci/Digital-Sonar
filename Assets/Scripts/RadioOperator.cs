@@ -28,6 +28,7 @@ public class RadioOperator : MonoBehaviour
     public int reportMove(Vector2Int move) {
         if (path.nodeCount == 0) {
             path.startPath(move);
+            path.updateDisplay(move, new Vector2Int((int)path.transform.position.x, (int)path.transform.position.y));
         }
         Path.Node[] tails = path.getTails();
         int tailsLength = tails.Length;

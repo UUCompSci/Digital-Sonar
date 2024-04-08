@@ -10,7 +10,7 @@ public class SubmarineToken : MonoBehaviour
     void Start()
     {
         submarine = transform.parent.gameObject;
-        transform.parent = null;
+        transform.SetParent(null);
     }
 
     // Update is called once per frame

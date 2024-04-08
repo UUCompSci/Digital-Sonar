@@ -9,12 +9,11 @@ using UnityEngine.UI;
 
 public class GameLogicManager : MonoBehaviour
 {
-    public GameObject player1Submarine;
-    public GameObject player2Submarine;
-    public RadioOperator player1RadioOperator;
-    public RadioOperator player2RadioOperator;
-    public GameObject player1UI;
-    public GameObject player2UI;
+    public PlayerController[] turnList;
+    public RadioOperator[] radioOperators;
+    public GameObject[] turnScreens;
+    public GameObject[] UIList;
+    public Tilemap[] tilemaps;
     public int mapWidth;
     public int mapHeight;
     public bool energyGainOnSilence;
@@ -23,10 +22,6 @@ public class GameLogicManager : MonoBehaviour
     public int sonarEnergyCost;
     public int roundCount;
     private int turnTracker;
-    public GameObject[] turnScreens;
-    private PlayerController[] turnList;
-    private GameObject[] UIList;
-    public Tilemap[] tilemaps;
     private enum gameState {
         WON,
         CONTINUE,
@@ -41,28 +36,18 @@ public class GameLogicManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        turnList = new PlayerController[] {player1Submarine.GetComponent<PlayerController>(), player2Submarine.GetComponent<PlayerController>()};
-        UIList = new GameObject[] {player1UI, player2UI};
         turnScreens = GameObject.FindGameObjectsWithTag("TurnScreen");
         for (int i = 0; i < turnScreens.Length; i++) {
             turnScreens[i].SetActive(false);
         }
     }
 
-    public GameObject getOpponent(GameObject queryingPlayer) {
-        if (queryingPlayer == player1Submarine) {
-            return player2Submarine;
-        } else {
-            return player1Submarine;
-        }
+    public PlayerController getOpponent(PlayerController queryingPlayer) {
+        return turnList[(System.Array.IndexOf(turnList, queryingPlayer) + 1) % turnList.Length];
     }
 
     public RadioOperator getOpponentRadioOperator(GameObject queryingPlayer) {
-        if (queryingPlayer == player1Submarine) {
-            return player2RadioOperator;
-        } else {
-            return player1RadioOperator;
-        }
+        return radioOperators[(System.Array.IndexOf(turnList, queryingPlayer) + 1) % turnList.Length];
     }
 
     public void endCurrentTurn() {
@@ -85,24 +70,26 @@ public class GameLogicManager : MonoBehaviour
         UIList[i].SetActive(true);
         UIList[(i + 1) % turnList.Length].SetActive(false);
         if (logicScript.getEnergy() >= silenceEnergyCost) {
-            buttonManager.getSilenceButton().GetComponent<Button>().enabled = true;
+            buttonManager.getSilenceButton().GetComponent<Button>().interactable = true;
         } else {
-            buttonManager.getSilenceButton().GetComponent<Button>().enabled = false;
+            buttonManager.getSilenceButton().GetComponent<Button>().interactable = false;
         }
         if (logicScript.getEnergy() >= torpedoEnergyCost) {
-            buttonManager.getTorpedoButton().GetComponent<Button>().enabled = true;
+            buttonManager.getTorpedoButton().GetComponent<Button>().interactable = true;
         } else {
-            buttonManager.getTorpedoButton().GetComponent<Button>().enabled = false;
+            buttonManager.getTorpedoButton().GetComponent<Button>().interactable = false;
         }
         if (logicScript.getEnergy() >= sonarEnergyCost) {
-            buttonManager.getSonarButton().GetComponent<Button>().enabled = true;
+            buttonManager.getSonarButton().GetComponent<Button>().interactable = true;
         } else {
-            buttonManager.getSonarButton().GetComponent<Button>().enabled = false;
+            buttonManager.getSonarButton().GetComponent<Button>().interactable = false;
         }
         tilemaps[i].GetComponent<TilemapRenderer>().enabled = true;
-        tilemaps[(i + 1) % 2].GetComponent<TilemapRenderer>().enabled = true;
+        tilemaps[(i + 1) % turnList.Length].GetComponent<TilemapRenderer>().enabled = false;
         player.gameObject.SetActive(true);
         turnList[(i + 1) % turnList.Length].gameObject.SetActive(false);
+        radioOperators[i].GetComponentInChildren<Grid>().gameObject.GetComponentInChildren<TilemapRenderer>().enabled = true;
+        radioOperators[(i + 1) % turnList.Length].GetComponentInChildren<Grid>().gameObject.GetComponentInChildren<TilemapRenderer>().enabled = false;
         player.displayMoveOptions();
         turnScreens[i].SetActive(false);
     }

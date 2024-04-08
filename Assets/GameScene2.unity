@@ -442,12 +442,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be8919c70ee496041b2830d6ae2835b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player1Submarine: {fileID: 865241841}
-  player2Submarine: {fileID: 495273906}
-  player1RadioOperator: {fileID: 931215333}
-  player2RadioOperator: {fileID: 1066410564}
-  player1UI: {fileID: 2144731952}
-  player2UI: {fileID: 1594420014}
+  turnList:
+  - {fileID: 865241844}
+  - {fileID: 495273908}
+  radioOperators:
+  - {fileID: 931215333}
+  - {fileID: 1066410564}
+  turnScreens: []
+  UIList:
+  - {fileID: 2144731952}
+  - {fileID: 1594420014}
+  tilemaps:
+  - {fileID: 1946576757}
+  - {fileID: 1287888579}
   mapWidth: 10
   mapHeight: 10
   energyGainOnSilence: 0
@@ -455,10 +462,6 @@ MonoBehaviour:
   torpedoEnergyCost: 4
   sonarEnergyCost: 2
   roundCount: 0
-  turnScreens: []
-  tilemaps:
-  - {fileID: 1946576757}
-  - {fileID: 1287888579}
 --- !u!4 &39742043
 Transform:
   m_ObjectHideFlags: 0
@@ -2129,7 +2132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeCount: 0
-  tilemap: {fileID: 1287888579}
+  tilemap: {fileID: 1733956829}
   straight: {fileID: 11400000, guid: 32cf8609a77f15e4db0415899ad77f7c, type: 2}
   corner: {fileID: 11400000, guid: 688ee5ef0867d254e90f0596f74bc8dc, type: 2}
   endpoint: {fileID: 11400000, guid: b1cfe66c80828e24faee07074a66b8c4, type: 2}
@@ -3808,7 +3811,7 @@ MonoBehaviour:
   moveTarget: {fileID: 2377237091925919271, guid: 928d4794ff977584387b763d8ee4fc71, type: 3}
   silenceTarget: {fileID: 2377237091925919271, guid: 3d4911f3ab479d64da72fa978cb0df29, type: 3}
   moveRange: 1
-  silenceRange: 4
+  silenceRange: 1
   whatStopsMovement: 0
   canvas: {fileID: 2004249147}
   gameLogicManager: {fileID: 39742042}
@@ -6271,7 +6274,7 @@ Transform:
   m_GameObject: {fileID: 719674258}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.118411, y: -1.1387964, z: 5.8188334}
+  m_LocalPosition: {x: -0.5, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6924,17 +6927,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 861953848}
   m_CullTransparentMesh: 1
---- !u!1 &865241841 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5630089787978307939, guid: a5d5c3e711bf9324ba6fc7ac4ae66c8a, type: 3}
-  m_PrefabInstance: {fileID: 4754248125987716250}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &865241844 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2791469524184908875, guid: a5d5c3e711bf9324ba6fc7ac4ae66c8a, type: 3}
   m_PrefabInstance: {fileID: 4754248125987716250}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 865241841}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 515a07879e4a65a40a95a1336f54e5de, type: 3}
@@ -6967,7 +6965,7 @@ Transform:
   m_GameObject: {fileID: 890385509}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.118411, y: -1.1387964, z: 5.8188334}
+  m_LocalPosition: {x: -0.5, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7139,7 +7137,7 @@ Transform:
   m_GameObject: {fileID: 931215332}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.618411, y: 0.63879645, z: -5.8188334}
+  m_LocalPosition: {x: 10, y: -5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7430,7 +7428,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -7455,7 +7453,7 @@ Transform:
   m_GameObject: {fileID: 951863675}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 5, y: -0.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7978,7 +7976,7 @@ Transform:
   m_GameObject: {fileID: 1066410563}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.618411, y: 0.63879645, z: -5.8188334}
+  m_LocalPosition: {x: 10, y: -5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10753,8 +10751,8 @@ Canvas:
   m_GameObject: {fileID: 1594420014}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 951863677}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -12511,7 +12509,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeCount: 0
-  tilemap: {fileID: 1946576757}
+  tilemap: {fileID: 432171318}
   straight: {fileID: 11400000, guid: 32cf8609a77f15e4db0415899ad77f7c, type: 2}
   corner: {fileID: 11400000, guid: 688ee5ef0867d254e90f0596f74bc8dc, type: 2}
   endpoint: {fileID: 11400000, guid: b1cfe66c80828e24faee07074a66b8c4, type: 2}
@@ -15170,8 +15168,8 @@ Canvas:
   m_GameObject: {fileID: 2144731952}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 951863677}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -15240,6 +15238,10 @@ PrefabInstance:
       propertyPath: islandMap
       value: 
       objectReference: {fileID: 526290278}
+    - target: {fileID: 2791469524184908875, guid: a5d5c3e711bf9324ba6fc7ac4ae66c8a, type: 3}
+      propertyPath: silenceRange
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2791469524184908875, guid: a5d5c3e711bf9324ba6fc7ac4ae66c8a, type: 3}
       propertyPath: gameLogicManager
       value: 

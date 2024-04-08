@@ -161,7 +161,7 @@ public class PlayerController : MonoBehaviour
         if (xPosition >= 0 && yPosition >= 0) {
             errorMessage.transform.parent.gameObject.SetActive(false);
             GameObject mine = Instantiate(minePrefab, new Vector3(xPosition, yPosition, 0), Quaternion.identity);
-            mine.GetComponent<MineLogicScript>().detonate(gameLogicManager.getOpponent(gameObject).GetComponentInChildren<SubmarineLogicScript>());
+            mine.GetComponent<MineLogicScript>().detonate(gameLogicManager.getOpponent(this).GetComponentInChildren<SubmarineLogicScript>());
         }
     }
 
