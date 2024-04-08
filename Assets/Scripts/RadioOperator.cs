@@ -34,7 +34,7 @@ public class RadioOperator : MonoBehaviour
         int tailsLength = tails.Length;
         for (int i = 0; i < tailsLength; i++) { // for each tail in path.tails
             Path.Node tail = tails[i];
-            Vector2Int oldPosition = tail.getRelativePosition();
+            Vector2Int oldPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y) - tail.getRelativePosition();
             Vector2Int targetRelativePosition = new Vector2Int(oldPosition.x + move.x, oldPosition.y + move.y);
             if (tail.getGrid() == null) {
                 NumberGrid.setIslands(islands);
@@ -83,7 +83,7 @@ public class RadioOperator : MonoBehaviour
             } else {
                 tails = tails.Where(var => var != tail).ToArray();
                 tail.setGrid(null);
-                path.updateDisplay(tail.getMove(), validMoveList, oldPosition, tail.getSilenceIn());
+                path.updateDisplay(tail.getMove(), validMoveList, oldPosition);
             }
         }
         path.setTails(tails);

@@ -37,7 +37,7 @@ public class GameLogicManager : MonoBehaviour
     void Start()
     {
         turnScreens = GameObject.FindGameObjectsWithTag("TurnScreen");
-        for (int i = 0; i < turnScreens.Length; i++) {
+        for (int i = 1; i < turnScreens.Length; i++) {
             turnScreens[i].SetActive(false);
         }
     }

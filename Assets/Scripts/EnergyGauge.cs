@@ -23,12 +23,14 @@ public class EnergyGauge : MonoBehaviour
 
     public void displayEnergyGain(int energyGain) {
         for (int i = 0; i < energyGain; i++) {
+            energy += energyGain;
             gameObject.transform.GetChild(energy + i).GetComponent<SpriteRenderer>().color = fullColor;
         }
     }
 
     public void displayEnergyLoss(int energyLoss) {
         for (int i = 1; i <= energyLoss; i++) {
+            energy -= energyLoss;
             gameObject.transform.GetChild(energy - i).GetComponent<SpriteRenderer>().color = emptyColor;
         }
     }

@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
         if (submarine.getPath().nodeCount != 0) {
             Path.Node[] tails = submarine.getPath().getTails();
             submarine.getPath().extendTail(0, move, false);
-            submarine.getPath().updateDisplay(tails[0].getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), false);
+            submarine.getPath().updateDisplay(tails[0].getParent().getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), false);
         } else {
             submarine.setPath(move);
             submarine.getPath().updateDisplay(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
@@ -70,7 +70,7 @@ public class PlayerController : MonoBehaviour
         if (submarine.getPath().nodeCount != 0) {
             Path.Node[] tails = submarine.getPath().getTails();
             submarine.getPath().extendTail(0, move, true);
-            submarine.getPath().updateDisplay(tails[0].getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), true);
+            submarine.getPath().updateDisplay(tails[0].getParent().getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), true);
         } else {
             submarine.setPath(move);
             submarine.getPath().updateDisplay(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
             for (int dist = 1; dist <= silenceRange; dist++) {
                 Vector2Int move = new Vector2Int((int)Math.Pow(-1, dir / 2) * (dir % 2) * dist, (int)Math.Pow(-1, dir / 2) * ((dir + 1) % 2) * dist);
                 Vector2Int targetPosition = new Vector2Int(position.x + move.x, position.y + move.y);
-                bool isValid = validateMove(targetPosition); // same mod operation to check for the sign and floor division (not inverted this time) to check if the dir is supposed to be vertical
+                bool isValid = validateMove(move); // same mod operation to check for the sign and floor division (not inverted this time) to check if the dir is supposed to be vertical
                 dist += silenceRange * Convert.ToInt32(!isValid); // ends the loop early on hitting an obstacle
                 if (isValid) {
                     GameObject newSilenceTarget = Instantiate(silenceTarget, new Vector3Int(targetPosition.x, targetPosition.y, 0), Quaternion.Euler(Vector3.zero), canvas);
