@@ -15,6 +15,9 @@ public class HealthBar : MonoBehaviour
     void Start()
     {
         health = 0;
+        for (int i = 0; i < healthBarNotches.Length; i++) {
+            healthBarNotches[i].color = fullColor;
+        }
     }
 
     // Update is called once per frame
@@ -22,18 +25,10 @@ public class HealthBar : MonoBehaviour
     {
         
     }
-
-    public void displayHealthGain(int healthGain) {
-        for (int i = 0; i < healthGain; i++) {
-            healthBarNotches[health].color = fullColor;
-            health += 1;
-        }
-    }
-
     public void displayHealthLoss(int healthLoss) {
         for (int i = 1; i <= healthLoss; i++) {
             health -= 1;
-            healthBarNotches[health].GetComponent<SpriteRenderer>().color = emptyColor;
+            healthBarNotches[health].color = emptyColor;
         }
     }
 }

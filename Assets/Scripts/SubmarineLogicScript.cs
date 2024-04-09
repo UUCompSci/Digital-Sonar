@@ -17,9 +17,8 @@ public class SubmarineLogicScript : MonoBehaviour
     [SerializeField] private int health;
     private Path path;
     public EnergyGauge energyGauge;
-
-    [SerializeField]
-    private Tilemap pathTilemap;
+    public HealthBar healthBar;
+    [SerializeField] private Tilemap pathTilemap;
 
     void Start() {
         movePoint.SetParent(null);
@@ -108,15 +107,14 @@ public class SubmarineLogicScript : MonoBehaviour
     }
 
     public int dealDamage(int damage) {
-        if (damage > 0 && damage <= health) {
-            health -= damage;
-            return health;
-        } else if (damage > 0) {
+        if (damage > health) {
+            damage = health;
+            
             health = 0;
-            return health;
-        } else {
-            Debug.Log("dealDamage only accepts positive integer values, try again.");
+        } else if (damage > 0) {
+            health -= damage;
         }
+        healthBar.displayHealthLoss(damage);
         return health;
     }
 }

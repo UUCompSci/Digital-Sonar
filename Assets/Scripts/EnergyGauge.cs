@@ -33,7 +33,7 @@ public class EnergyGauge : MonoBehaviour
     public void displayEnergyLoss(int energyLoss) {
         for (int i = 1; i <= energyLoss; i++) {
             energy -= 1;
-            energyGaugeSlots[energy].GetComponent<SpriteRenderer>().color = emptyColor;
+            energyGaugeSlots[energy].color = emptyColor;
         }
     }
 }
