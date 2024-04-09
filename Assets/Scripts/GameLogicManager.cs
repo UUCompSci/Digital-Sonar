@@ -46,7 +46,7 @@ public class GameLogicManager : MonoBehaviour
         return turnList[(System.Array.IndexOf(turnList, queryingPlayer) + 1) % turnList.Length];
     }
 
-    public RadioOperator getOpponentRadioOperator(GameObject queryingPlayer) {
+    public RadioOperator getOpponentRadioOperator(PlayerController queryingPlayer) {
         return radioOperators[(System.Array.IndexOf(turnList, queryingPlayer) + 1) % turnList.Length];
     }
 

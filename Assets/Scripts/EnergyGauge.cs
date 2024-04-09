@@ -9,6 +9,8 @@ public class EnergyGauge : MonoBehaviour
     Color fullColor = Color.green;
     Color emptyColor = Color.red;
 
+    public SpriteRenderer[] energyGaugeSlots;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,15 +25,15 @@ public class EnergyGauge : MonoBehaviour
 
     public void displayEnergyGain(int energyGain) {
         for (int i = 0; i < energyGain; i++) {
-            energy += energyGain;
-            gameObject.transform.GetChild(energy + i).GetComponent<SpriteRenderer>().color = fullColor;
+            energyGaugeSlots[energy].color = fullColor;
+            energy += 1;
         }
     }
 
     public void displayEnergyLoss(int energyLoss) {
         for (int i = 1; i <= energyLoss; i++) {
-            energy -= energyLoss;
-            gameObject.transform.GetChild(energy - i).GetComponent<SpriteRenderer>().color = emptyColor;
+            energy -= 1;
+            energyGaugeSlots[energy].GetComponent<SpriteRenderer>().color = emptyColor;
         }
     }
 }

@@ -109,7 +109,7 @@ public class Path : MonoBehaviour {
         }
     }
 
-    private Vector2Int startingPosition;
+    public Vector2Int startingPosition;
     private Node head;
     private Node[] tails;
     public int nodeCount;
@@ -224,10 +224,10 @@ public class Path : MonoBehaviour {
 
     public void updateDisplay(Vector2Int move, Vector2Int position) {
         tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), start);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move, 0)), Vector3.one));
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
         Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
         tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpoint);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move, 0)), Vector3.one));
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
     }
 
     public void updateDisplay(Vector2Int lastMove, Vector2Int move, Vector2Int position, bool fromSilence, bool toSilence) {
@@ -251,11 +251,11 @@ public class Path : MonoBehaviour {
         }
         tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
         int shouldFlip = this.shouldFlip(lastMove, move);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns(lastMove, shouldFlip)), Vector3.one));
-        // tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * ((quarterTurns(lastMove) + 2 * shouldFlip) % 4)), Vector3.one));
+        // tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns(lastMove, shouldFlip)), Vector3.one));
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * ((quarterTurns(lastMove) + 2 * shouldFlip * (lastMove.x % 2)) % 4)), Vector3.one));
         Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
         tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpoint);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move, 0)), Vector3.one));
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
     }
 
     public void updateDisplay(Vector2Int lastMove, Vector2Int[] moves, Vector2Int position) {
@@ -270,16 +270,16 @@ public class Path : MonoBehaviour {
             shouldFlipBranch = shouldFlip(lastMove, moves);
         }
         tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * ((quarterTurns(lastMove, shouldFlipBranch) + 2 * shouldFlipBranch) % 4)), Vector3.one));
+        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * ((quarterTurns(lastMove) + 2 * shouldFlipBranch * (lastMove.x % 2)) % 4)), Vector3.one));
         for (int i = 0; i < moves.Length; i++) {
             Vector3Int targetPosition = new Vector3Int(position.x + moves[i].x, position.y + moves[i].y, 0);
             tilemap.SetTile(tilemap.WorldToCell(targetPosition), silenceEndpoint);
-            tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(moves[i].x, moves[i].y), 0)), Vector3.one));
+            tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(moves[i].x, moves[i].y))), Vector3.one));
         }
     }
 
-    public int quarterTurns(Vector2Int move, int shouldFlip) {
-        return ((move.y + 1) * (move.y % 2)) + ((2 * shouldFlip) + move.x + 2) % 4 * (move.x % 2);
+    public int quarterTurns(Vector2Int move) {
+        return ((move.y + 1) * (move.y % 2)) + ((move.x + 4) % 4);
     }
 
     public int shouldFlip(Vector2Int lastMove, Vector2Int move) {

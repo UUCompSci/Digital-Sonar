@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
     {
         movePoint.SetParent(null);
         gameLogicManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
-        reportee = gameLogicManager.getOpponentRadioOperator(this.gameObject);
+        reportee = gameLogicManager.getOpponentRadioOperator(this);
         classicSonarPrompt.gameObject.transform.SetParent(null);
         torpedoMenu.gameObject.transform.SetParent(null);
 
@@ -52,13 +52,13 @@ public class PlayerController : MonoBehaviour
     }
 
     public Vector2Int Move(SubmarineLogicScript submarine, Vector2Int targetPosition) {
-        Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
+        Vector2Int move = new Vector2Int(targetPosition.x - (int)transform.position.x, targetPosition.y - (int)transform.position.y);
         if (submarine.getPath().nodeCount != 0) {
             Path.Node[] tails = submarine.getPath().getTails();
             submarine.getPath().extendTail(0, move, false);
             submarine.getPath().updateDisplay(tails[0].getParent().getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), false);
         } else {
-            submarine.setPath(move);
+            submarine.setPath(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
             submarine.getPath().updateDisplay(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
         }
         movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
@@ -66,14 +66,11 @@ public class PlayerController : MonoBehaviour
     }
 
     public string Move(SubmarineLogicScript submarine, Vector2Int targetPosition, string report) {
-        Vector2Int move = new Vector2Int(targetPosition.x - (int)gameObject.transform.position.x, targetPosition.y - (int)gameObject.transform.position.y);
+        Vector2Int move = new Vector2Int(targetPosition.x - (int)transform.position.x, targetPosition.y - (int)transform.position.y);
         if (submarine.getPath().nodeCount != 0) {
             Path.Node[] tails = submarine.getPath().getTails();
             submarine.getPath().extendTail(0, move, true);
             submarine.getPath().updateDisplay(tails[0].getParent().getMove(), move, new Vector2Int((int)transform.position.x, (int)transform.position.y), tails[0].getSilenceIn(), true);
-        } else {
-            submarine.setPath(move);
-            submarine.getPath().updateDisplay(move, new Vector2Int((int)transform.position.x, (int)transform.position.y));
         }
         movePoint.position = new Vector3Int(targetPosition.x, targetPosition.y, 0);
         return report;
@@ -85,6 +82,8 @@ public class PlayerController : MonoBehaviour
         bool result2 = false;
         if (path.nodeCount != 0) {
             Path.Node tail = path.getTails()[0];
+            Debug.Log("target relativePosition.x: " + transform.position.x + move.x);
+            Debug.Log("target relativePosition.y: " + transform.position.y + move.y);
             result2 = path.isCollision(new Vector2Int(targetPosition.x - path.getStartingPosition().x, targetPosition.y - path.getStartingPosition().y), tail);
         }
         Tile tile = (Tile)islandMap.GetTile(islandMap.WorldToCell(new Vector3Int(targetPosition.x, targetPosition.y, 0)));

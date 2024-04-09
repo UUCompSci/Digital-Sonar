@@ -642,6 +642,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe747941c2faed34484d78f59b29e4b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  energyGaugeSlots:
+  - {fileID: 1139615872}
+  - {fileID: 1326253274}
+  - {fileID: 508795811}
+  - {fileID: 918567941}
 --- !u!224 &102121672
 RectTransform:
   m_ObjectHideFlags: 0
@@ -738,6 +743,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe747941c2faed34484d78f59b29e4b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  energyGaugeSlots:
+  - {fileID: 1504619415}
+  - {fileID: 653208256}
+  - {fileID: 492371194}
+  - {fileID: 2016875315}
 --- !u!222 &114016455
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2131,6 +2141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60353eff02aeba458a6e6844741c0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingPosition: {x: 0, y: 0}
   nodeCount: 0
   tilemap: {fileID: 1733956829}
   straight: {fileID: 11400000, guid: 32cf8609a77f15e4db0415899ad77f7c, type: 2}
@@ -2812,6 +2823,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60353eff02aeba458a6e6844741c0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingPosition: {x: 0, y: 0}
   nodeCount: 0
   tilemap: {fileID: 1287888579}
   straight: {fileID: 11400000, guid: 32cf8609a77f15e4db0415899ad77f7c, type: 2}
@@ -5367,7 +5379,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 865241844}
+      - m_Target: {fileID: 495273908}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
         m_MethodName: displaySilenceOptions
         m_Mode: 1
@@ -12508,6 +12520,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60353eff02aeba458a6e6844741c0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingPosition: {x: 0, y: 0}
   nodeCount: 0
   tilemap: {fileID: 432171318}
   straight: {fileID: 11400000, guid: 32cf8609a77f15e4db0415899ad77f7c, type: 2}
