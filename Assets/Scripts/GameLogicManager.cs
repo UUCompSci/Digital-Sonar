@@ -12,7 +12,7 @@ public class GameLogicManager : MonoBehaviour
     public PlayerController[] turnList;
     public RadioOperator[] radioOperators;
     public GameObject[] turnScreens;
-    public GameObject[] UIList;
+    public UIManager[] UIList;
     public Tilemap[] tilemaps;
     public int mapWidth;
     public int mapHeight;
@@ -57,6 +57,14 @@ public class GameLogicManager : MonoBehaviour
         };
     }
 
+    public void spendAction(PlayerController queryingPlayer) {
+        UIManager buttonManager = UIList[System.Array.IndexOf(turnList, queryingPlayer)];
+        buttonManager.getTorpedoButton().GetComponent<Button>().interactable = false;
+        buttonManager.getSurfaceButton().GetComponent<Button>().interactable = false;
+        buttonManager.getSilenceButton().GetComponent<Button>().interactable = false;
+        buttonManager.getSonarButton().GetComponent<Button>().interactable = false;
+    }
+
     public void endCurrentTurn(PlayerController opponent) {
         endCurrentTurn();
         opponent.gameObject.GetComponentInChildren<Canvas>().enabled = true;
@@ -66,9 +74,9 @@ public class GameLogicManager : MonoBehaviour
     public void startTurn(int i) {
         PlayerController player = turnList[i];
         SubmarineLogicScript logicScript = player.gameObject.GetComponentInChildren<SubmarineLogicScript>();
-        UIManager buttonManager = UIList[i].GetComponent<UIManager>();
-        UIList[i].SetActive(true);
-        UIList[(i + 1) % turnList.Length].SetActive(false);
+        UIManager buttonManager = UIList[i];
+        UIList[i].gameObject.SetActive(true);
+        UIList[(i + 1) % turnList.Length].gameObject.SetActive(false);
         if (logicScript.getEnergy() >= silenceEnergyCost) {
             buttonManager.getSilenceButton().GetComponent<Button>().interactable = true;
         } else {

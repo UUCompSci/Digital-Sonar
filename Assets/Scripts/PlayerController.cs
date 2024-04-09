@@ -77,7 +77,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public bool validateMove(Vector2Int move) {
-        Vector2Int targetPosition = new Vector2Int((int)transform.position.x + move.x, (int)transform.position.y + move.y);
+        Vector2Int targetPosition = new Vector2Int((int)movePoint.position.x + move.x, (int)movePoint.position.y + move.y);
         Path path = gameObject.GetComponentInChildren<Path>();
         bool result2 = false;
         if (path.nodeCount != 0) {
@@ -92,7 +92,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public void displayMoveOptions() {
-        Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position.x), Convert.ToInt32(gameObject.transform.position.y));
+        Vector2Int position = new Vector2Int(Convert.ToInt32(movePoint.position.x), Convert.ToInt32(movePoint.position.y));
         for (int dir = 0; dir <= 3; dir++) {
             for (int dist = 1; dist <= moveRange; dist++) {
                 Vector2Int move = new Vector2Int((int)Math.Pow(-1, dir / 2) * (dir % 2) * dist, (int)Math.Pow(-1, dir / 2) * ((dir + 1) % 2) * dist);
@@ -108,7 +108,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public void displaySilenceOptions() {
-        Vector2Int position = new Vector2Int(Convert.ToInt32(gameObject.transform.position.x), Convert.ToInt32(gameObject.transform.position.y));
+        Vector2Int position = new Vector2Int(Convert.ToInt32(movePoint.position.x), Convert.ToInt32(movePoint.position.y));
         for (int dir = 0; dir <= 3; dir++) {
             for (int dist = 1; dist <= silenceRange; dist++) {
                 Vector2Int move = new Vector2Int((int)Math.Pow(-1, dir / 2) * (dir % 2) * dist, (int)Math.Pow(-1, dir / 2) * ((dir + 1) % 2) * dist);
@@ -165,6 +165,8 @@ public class PlayerController : MonoBehaviour
     }
 
     public void surface() {
+        gameLogicManager.spendAction(this);
+        clearCanvas();
         gameObject.GetComponentInChildren<SubmarineLogicScript>().clearPath();
         reportee.reportPosition(new Vector2Int((int)transform.position.x, (int)transform.position.y));
     }

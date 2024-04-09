@@ -103,6 +103,7 @@ public class SubmarineLogicScript : MonoBehaviour
 
     public void clearPath() {
         path.clearPath();
+        pathTilemap.ClearAllTiles();
     }
 
     public int dealDamage(int damage) {
