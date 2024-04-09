@@ -10,6 +10,7 @@ using UnityEditor.UI;
 using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.Rendering.Universal.Internal;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
@@ -134,6 +135,12 @@ public class Path : MonoBehaviour {
         nodeCount = 2;
     }
 
+    public void startPath(Vector2Int move, Vector2Int startingPosition) {
+        head = new Node(null, Vector2Int.zero);
+        tails = new Node[1] {new Node(head, move)};
+        nodeCount = 2;
+    }
+
     public Vector2Int getStartingPosition() {
         return startingPosition;
     }
@@ -169,6 +176,7 @@ public class Path : MonoBehaviour {
         head = null;
         tails = new Node[] {};
         nodeCount = 0;
+        tilemap.ClearAllTiles();
     }
     
     public void setTails(Node[] tails) {
@@ -254,7 +262,8 @@ public class Path : MonoBehaviour {
         // tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns(lastMove, shouldFlip)), Vector3.one));
         tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * ((quarterTurns(lastMove) + 2 * shouldFlip * (lastMove.x % 2)) % 4)), Vector3.one));
         Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
-        tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpoint);
+        Tile endpointTile = toSilence ? silenceEndpoint : endpoint;
+        tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpointTile);
         tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
     }
 
@@ -276,6 +285,31 @@ public class Path : MonoBehaviour {
             tilemap.SetTile(tilemap.WorldToCell(targetPosition), silenceEndpoint);
             tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(moves[i].x, moves[i].y))), Vector3.one));
         }
+    }
+
+    public void reconstructDisplay() {
+        tilemap.ClearAllTiles();
+        updateDisplay(head.getMove(), startingPosition);
+        reconstructDisplayHelper(head);
+    }
+
+    private int reconstructDisplayHelper(Node parent) {
+        Node[] children = parent.getChildren();
+        if (children.Length == 1) {
+            updateDisplay(parent.getMove(), children[0].getMove(), startingPosition + parent.getRelativePosition(), children[0].getSilenceIn(), children[0].getSilenceOut());
+        } else if (children.Length > 1) {
+            Vector2Int[] moves = {};
+            for (int i = 0; i < children.Length; i++) {
+                moves.Append(children[i].getMove());
+            }
+            updateDisplay(parent.getMove(), moves, startingPosition + parent.getRelativePosition());
+        } else {
+            return 0;
+        }
+        for (int i = 0; i < children.Length; i++) {
+            reconstructDisplayHelper(children[i]);
+        }
+        return 1;
     }
 
     public int quarterTurns(Vector2Int move) {

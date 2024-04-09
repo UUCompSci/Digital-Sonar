@@ -29,25 +29,31 @@ public class RadioOperator : MonoBehaviour
         if (path.nodeCount == 0) {
             path.startPath(move);
             path.updateDisplay(move, new Vector2Int((int)path.transform.position.x, (int)path.transform.position.y));
-        }
-        Path.Node[] tails = path.getTails();
-        int tailsLength = tails.Length;
-        for (int i = 0; i < tailsLength; i++) { // for each tail in path.tails
-            Path.Node tail = tails[i];
-            Vector2Int oldPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y) - tail.getRelativePosition();
-            Vector2Int targetRelativePosition = new Vector2Int(oldPosition.x + move.x, oldPosition.y + move.y);
-            if (tail.getGrid() == null) {
-                NumberGrid.setIslands(islands);
-                tail.setGrid(new NumberGrid());
-            }
-            tail.getGrid().update(targetRelativePosition);
-            if (tail.getGrid().isFull() || path.isCollision(targetRelativePosition, tail)) {
-                path.collapseBranch(tail);
-            } else {
-                Path.Node newTail = path.extendTail(i, move, false);
-                newTail.setGrid(tail.getGrid());
-                tail.setGrid(null);
-                path.updateDisplay(tail.getMove(), move, oldPosition, tail.getSilenceIn(), newTail.getSilenceIn());
+        } else {
+            Path.Node[] tails = path.getTails();
+            int tailsLength = tails.Length;
+            for (int i = 0; i < tailsLength; i++) { // for each tail in path.tails
+                Path.Node tail = tails[i];
+                Vector2Int oldPosition;
+                if (path.getStartingPosition() == Vector2Int.zero) {
+                    oldPosition = new Vector2Int((int)path.transform.position.x, (int)path.transform.position.y) + tail.getRelativePosition();
+                } else {
+                    oldPosition = path.getStartingPosition() + tail.getRelativePosition();
+                }
+                Vector2Int targetRelativePosition = new Vector2Int(oldPosition.x + move.x, oldPosition.y + move.y);
+                if (tail.getGrid() == null) {
+                    NumberGrid.setIslands(islands);
+                    tail.setGrid(new NumberGrid());
+                }
+                tail.getGrid().update(targetRelativePosition);
+                if (tail.getGrid().isFull() || path.isCollision(targetRelativePosition, tail)) {
+                    path.collapseBranch(tail);
+                } else {
+                    Path.Node newTail = path.extendTail(i, move, false);
+                    newTail.setGrid(tail.getGrid());
+                    tail.setGrid(null);
+                    path.updateDisplay(tail.getMove(), move, oldPosition, tail.getSilenceIn(), newTail.getSilenceIn());
+                }
             }
         }
         return 1;
@@ -61,7 +67,12 @@ public class RadioOperator : MonoBehaviour
             Vector2Int lastMove = tail.getMove();
             Vector2Int[] moveList = new Vector2Int[] {new Vector2Int(lastMove.x, lastMove.y), new Vector2Int(lastMove.y, -lastMove.x), new Vector2Int(-lastMove.y, lastMove.x)};
             Vector2Int[] validMoveList = {};
-            Vector2Int oldPosition = tail.getRelativePosition();
+            Vector2Int oldPosition;
+            if (path.getStartingPosition() == Vector2Int.zero) {
+                oldPosition = new Vector2Int((int)path.transform.position.x, (int)path.transform.position.y) + tail.getRelativePosition();
+            } else {
+                oldPosition = path.getStartingPosition() + tail.getRelativePosition();
+            }
             for (int n = 0; n < 3; n++) {
                 Vector2Int move = new Vector2Int(moveList[0].x,moveList[0].y);
                 Vector2Int targetRelativePosition = new Vector2Int(oldPosition.x + move.x, oldPosition.y + move.y);
@@ -90,25 +101,9 @@ public class RadioOperator : MonoBehaviour
         return 1;
     }
 
-    public void reportPosition(Vector2Int position) {
-        Path.Node[] tails = path.getTails();
-        for (int i = 0; i < tails.Length; i++) {
-            int startingRow = position.x - tails[i].getRelativePosition().x;
-            int startingColumn = position.y - tails[i].getRelativePosition().y;
-            for (int n = 0; n < tails[i].getGrid().mapHeight; n++) {
-                if (n != startingRow) {
-                    tails[i].getGrid().eliminateRow(n);
-                }
-            }
-            for (int n = 0; n < tails[i].getGrid().mapWidth; n++) {
-                if (n != startingColumn) {
-                    tails[i].getGrid().eliminateColumn(n);
-                }
-            }
-            if (tails[i].getGrid().isFull()) {
-                path.collapseBranch(tails[i]);
-            }
-        }
+    public void reportSurface(Vector2Int position) {
+        path.clearPath();
+        path.setStartingPosition(position);
     }
 
     public void reportClassicSonar(int position, string positionType) {

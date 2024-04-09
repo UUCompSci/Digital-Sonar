@@ -13,8 +13,8 @@ public class SubmarineLogicScript : MonoBehaviour
     public Transform movePoint;
     public int maxHealth;
     public int maxEnergy;
-    private int energy;
-    private int health;
+    [SerializeField] private int energy;
+    [SerializeField] private int health;
     private Path path;
     public EnergyGauge energyGauge;
 
@@ -24,6 +24,8 @@ public class SubmarineLogicScript : MonoBehaviour
     void Start() {
         movePoint.SetParent(null);
         path = gameObject.transform.parent.GetComponentInChildren<Path>();
+        health = maxHealth;
+        energy = 0;
     }
 
     public int useEnergy(int n) {
@@ -103,7 +105,6 @@ public class SubmarineLogicScript : MonoBehaviour
 
     public void clearPath() {
         path.clearPath();
-        pathTilemap.ClearAllTiles();
     }
 
     public int dealDamage(int damage) {

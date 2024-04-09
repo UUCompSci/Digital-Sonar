@@ -168,6 +168,6 @@ public class PlayerController : MonoBehaviour
         gameLogicManager.spendAction(this);
         clearCanvas();
         gameObject.GetComponentInChildren<SubmarineLogicScript>().clearPath();
-        reportee.reportPosition(new Vector2Int((int)transform.position.x, (int)transform.position.y));
+        reportee.reportSurface(new Vector2Int((int)transform.position.x, (int)transform.position.y));
     }
 }
