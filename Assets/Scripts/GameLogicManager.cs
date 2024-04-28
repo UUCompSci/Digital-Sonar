@@ -22,6 +22,12 @@ public class GameLogicManager : MonoBehaviour
     public int sonarEnergyCost;
     public int roundCount;
     private int turnTracker;
+    public int directHitDamage;
+    public int indirectHitDamage;
+    public int directHitRange;
+    public int indirectHitRange;
+    public bool safeTorpedoes;
+    public bool safeMines;
     private enum gameState {
         WON,
         CONTINUE,
@@ -108,5 +114,25 @@ public class GameLogicManager : MonoBehaviour
 
     public int getSilenceEnergyCost() {
         return silenceEnergyCost;
+    }
+
+    public void createExplosion(Vector3Int targetPosition, PlayerController safeSub, bool safeExplosion) {
+        // trigger animation
+        foreach (PlayerController sub in turnList) {
+            if (sub != safeSub || !safeExplosion) {
+                SubmarineLogicScript logicScript = sub.gameObject.GetComponent<SubmarineLogicScript>();
+                if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.parent.position.x) <= directHitRange 
+                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.parent.position.y) <= directHitRange) {
+                    Debug.Log($"Direct hit! {directHitDamage} damage dealt!");
+                    logicScript.dealDamage(directHitDamage);
+                } else if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.parent.position.x) <= indirectHitRange 
+                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.parent.position.y) <= indirectHitRange) {
+                    Debug.Log($"Indirect hit! {indirectHitDamage} damage dealt!");
+                    logicScript.dealDamage(indirectHitDamage);
+                } else {
+                    Debug.Log("Miss! No damage dealt");
+                };
+            }
+        }
     }
 }

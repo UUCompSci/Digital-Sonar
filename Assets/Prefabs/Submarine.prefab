@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1429205700788678898}
   - component: {fileID: 7641727456268763170}
   - component: {fileID: 8803959001528103622}
+  - component: {fileID: 7278798329046247054}
   m_Layer: 5
   m_Name: TorpedoMenu
   m_TagString: Untagged
@@ -109,6 +110,21 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &7278798329046247054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 568895830225807730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ca474647a45d0f49a8e25387df9337a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetPosition: {x: -1, y: -1, z: 0}
+  warningMessage: {fileID: 7448444529966279245}
+  parentSub: {fileID: 0}
 --- !u!1 &854071287903922886
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,7 +248,10 @@ MonoBehaviour:
   movePoint: {fileID: 6280683404154166297}
   maxHealth: 2
   maxEnergy: 4
+  energy: 0
+  health: 0
   energyGauge: {fileID: 0}
+  healthBar: {fileID: 0}
   pathTilemap: {fileID: 0}
 --- !u!1 &2265474189295723646
 GameObject:
@@ -661,6 +680,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60353eff02aeba458a6e6844741c0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingPosition: {x: 0, y: 0}
   nodeCount: 0
   tilemap: {fileID: 0}
   straight: {fileID: 11400000, guid: 32cf8609a77f15e4db0415899ad77f7c, type: 2}

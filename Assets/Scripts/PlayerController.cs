@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
         gameLogicManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
         reportee = gameLogicManager.getOpponentRadioOperator(this);
         classicSonarPrompt.gameObject.transform.SetParent(null);
+        torpedoMenu.gameObject.GetComponentInChildren<TorpedoMenu>().parentSub = this;
         torpedoMenu.gameObject.transform.SetParent(null);
 
     }
@@ -139,28 +140,6 @@ public class PlayerController : MonoBehaviour
                 break;
             default:
                 break;
-        }
-    }
-
-    public void fireTorpedo(Canvas torpedoMenu) {
-        int xPosition = -1;
-        int yPosition = -1;
-        TMP_InputField row = torpedoMenu.transform.GetChild(2).GetComponent<TMP_InputField>();
-        TMP_InputField col = torpedoMenu.transform.GetChild(1).GetComponent<TMP_InputField>();
-        TMP_Text errorMessage = torpedoMenu.transform.GetChild(3).GetComponent<TMP_Text>();
-        if (Convert.ToInt32(row.text) >= 0 && Convert.ToInt32(row.text) <= gameLogicManager.mapHeight) {
-            xPosition = Convert.ToInt32(row.text);
-        } else {
-            errorMessage.enabled = true;
-            row.text = "";
-        }
-        if ((col.text[0] >= 'a' && col.text[0] <= 'a' + gameLogicManager.mapWidth) || (col.text[0] >= 'A' && col.text[0] <= 'A' + gameLogicManager.mapWidth)) {
-            yPosition = col.text[0];
-        }
-        if (xPosition >= 0 && yPosition >= 0) {
-            errorMessage.transform.parent.gameObject.SetActive(false);
-            GameObject mine = Instantiate(minePrefab, new Vector3(xPosition, yPosition, 0), Quaternion.identity);
-            mine.GetComponent<MineLogicScript>().detonate(gameLogicManager.getOpponent(this).GetComponentInChildren<SubmarineLogicScript>());
         }
     }
 
