@@ -44,12 +44,10 @@ public class RadioOperator : MonoBehaviour
                 if (tail.getGrid() == null) {
                     tail.setGrid(new NumberGrid());
                 }
-                tail.getGrid().update(targetRelativePosition);
                 if (tail.getGrid().isFull() || path.isCollision(targetRelativePosition, tail)) {
                     path.collapseBranch(tail);
                 } else {
                     Path.Node newTail = path.extendTail(i, move, false);
-                    newTail.setGrid(tail.getGrid());
                     tail.setGrid(null);
                     path.updateDisplay(tail.getMove(), move, oldPosition, tail.getSilenceIn(), newTail.getSilenceIn());
                 }
@@ -92,6 +90,11 @@ public class RadioOperator : MonoBehaviour
                 tails = tails.Where(var => var != tail).ToArray();
                 tail.setGrid(null);
                 path.updateDisplay(tail.getMove(), validMoveList, oldPosition);
+                foreach (Path.Node checkedTail in tails) {
+                    if (checkedTail.getGrid() == null) {
+                        Debug.LogError("A tail has exited reportMove() with a null grid");
+                    }
+                }
             }
         }
         path.setTails(tails);
@@ -104,23 +107,24 @@ public class RadioOperator : MonoBehaviour
     }
 
     public void reportClassicSonar(int position, string positionType) {
-        Path.Node[] tails = path.getTails();
         switch (positionType) {
             case "row":
-                foreach (Path.Node tail in tails) {
+                foreach (Path.Node tail in path.getTails()) {
                     int startingRow = position - tail.getRelativePosition().x;
-                    for (int n = 0; n < gameLogicManager.mapHeight; n++) {
+                    for (int n = 1; n <= gameLogicManager.mapHeight; n++) {
                         if (n != startingRow) {
+                            Debug.Log("Null grid? " + tail.getGrid() == null);
                             tail.getGrid().eliminateRow(n);
                         }
                     }
                 }
                 break;
             case "column":
-                foreach (Path.Node tail in tails) {
+                foreach (Path.Node tail in path.getTails()) {
                     int startingColumn = position + tail.getRelativePosition().y;
-                    for (int n = 0; n < gameLogicManager.mapWidth; n++) {
+                    for (int n = 1; n <= gameLogicManager.mapWidth; n++) {
                         if (n != startingColumn) {
+                            Debug.Log("Null grid? " + tail.getGrid() == null);
                             tail.getGrid().eliminateColumn(n);
                         }
                     }
@@ -137,5 +141,9 @@ public class RadioOperator : MonoBehaviour
 
     public void reportProbe(int region, bool isThere) {
         
+    }
+
+    public void reportTorpedo(Vector2Int targetPosition, int[] hitType) {
+        // to be implemented later
     }
 }

@@ -23,7 +23,8 @@ public class TorpedoMenu : MonoBehaviour
             return;
         }
         parentSub.clearCanvas();
-        gameLogicManager.createExplosion(targetPosition, parentSub, gameLogicManager.safeTorpedoes);
+        reportee = gameLogicManager.getOpponentRadioOperator(getOpponent(parentSub));
+        reportee.reportTorpedo(new Vector2Int(targetPosition.x, targetPosition.y), gameLogicManager.createExplosion(new Vector3Int(targetPosition.x - 5, targetPosition.y - 6), parentSub, gameLogicManager.safeTorpedoes));
     }
 
     public void setTargetPosition_x() {

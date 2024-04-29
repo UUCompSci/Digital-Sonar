@@ -69,6 +69,7 @@ public class GameLogicManager : MonoBehaviour
         buttonManager.getSurfaceButton().GetComponent<Button>().interactable = false;
         buttonManager.getSilenceButton().GetComponent<Button>().interactable = false;
         buttonManager.getSonarButton().GetComponent<Button>().interactable = false;
+        queryingPlayer.clearCanvas();
     }
 
     public void startTurn(int i) {
@@ -125,22 +126,28 @@ public class GameLogicManager : MonoBehaviour
         return silenceEnergyCost;
     }
 
-    public void createExplosion(Vector3Int targetPosition, PlayerController safeSub, bool safeExplosion) {
+    public int[] createExplosion(Vector3Int targetPosition, PlayerController safeSub, bool safeExplosion) {
         // trigger animation
         foreach (PlayerController sub in turnList) {
             if (sub != safeSub || !safeExplosion) {
+                Vector3Int subPosition = new Vector3Int((int) sub.transform.position.x, (int) sub.transform.position.y);
+                Debug.Log(subPosition);
+                Debug.Log(targetPosition);
                 SubmarineLogicScript logicScript = sub.gameObject.GetComponentInChildren<SubmarineLogicScript>();
-                if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.position.x) <= directHitRange 
-                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.position.y) <= directHitRange) {
+                if (System.Math.Abs(targetPosition.x - subPosition.x) <= directHitRange 
+                && System.Math.Abs(targetPosition.y - subPosition.y) <= directHitRange) {
                     Debug.Log($"Direct hit! {directHitDamage} damage dealt!");
                     logicScript.dealDamage(directHitDamage);
-                } else if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.position.x) <= indirectHitRange 
-                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.position.y) <= indirectHitRange) {
+                    return new int[2] {directHitRange, 1};
+                } else if (System.Math.Abs(targetPosition.x - subPosition.x) <= indirectHitRange 
+                && System.Math.Abs(targetPosition.y - subPosition.y) <= indirectHitRange) {
                     Debug.Log($"Indirect hit! {indirectHitDamage} damage dealt!");
                     logicScript.dealDamage(indirectHitDamage);
+                    return new int[2] {indirectHitRange, 1};
                 } else {
                     Debug.Log("Miss! No damage dealt");
-                };
+                    return new int[2] {indirectHitRange, 0};
+                }
             }
         }
     }

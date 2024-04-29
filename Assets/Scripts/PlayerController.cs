@@ -132,10 +132,10 @@ public class PlayerController : MonoBehaviour
     public void resolveClassicSonar(int positionType) {
         switch (positionType) {
             case 0:
-                reportee.reportClassicSonar((int)transform.position.x, "row");
+                reportee.reportClassicSonar((int)transform.position.x + 5, "row");
                 break;
             case 1:
-                reportee.reportClassicSonar((int)transform.position.y, "column");
+                reportee.reportClassicSonar((int)transform.position.y + 6, "column");
                 break;
             default:
                 break;
