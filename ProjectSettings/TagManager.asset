@@ -14,7 +14,7 @@ TagManager:
   - 
   - Water
   - UI
-  - StopMovement
+  - 
   - 
   - 
   - 
@@ -43,6 +43,9 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: StopMovement
+    uniqueID: 4041644489
     locked: 0
   - name: UI Layer 1
     uniqueID: 3667668419
