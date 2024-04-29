@@ -14,6 +14,7 @@ public class ReportMoveTarget : MonoBehaviour
         PlayerController player = submarine.GetComponent<PlayerController>();
         SubmarineLogicScript logicScript = submarine.GetComponentInChildren<SubmarineLogicScript>();
         GameLogicManager gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
+        gameManager.spendAction(player);
         Vector2Int targetPosition = new Vector2Int((int)transform.position.x, (int)transform.position.y);
         Vector2Int move = player.Move(logicScript, targetPosition);
         RadioOperator reportee = gameManager.getOpponentRadioOperator(player);

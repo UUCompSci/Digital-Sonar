@@ -59,8 +59,12 @@ public class Path : MonoBehaviour {
         }
 
         public Node addChild(Vector2Int move, bool silenceIn) {
-            Debug.Log("Adding child node with move " + move + " to parent node with move " + this.move);
             Node newChild = new Node(this, move, silenceIn);
+            if (grid != null) {
+                NumberGrid gridCopy = new NumberGrid(grid);
+                gridCopy.update(newChild.relativePosition);
+                newChild.grid = gridCopy;
+            }
             children = children.Concat(new Node[] {newChild}).ToArray();
             silenceOut = silenceIn;
             return newChild;
@@ -114,7 +118,8 @@ public class Path : MonoBehaviour {
     private Node head;
     private Node[] tails;
     public int nodeCount;
-    public Tilemap tilemap;
+    public Tilemap pathTilemap;
+    public Tilemap elimTilemap;
     public Tile straight;
     public Tile corner;
     public Tile endpoint;
@@ -128,6 +133,8 @@ public class Path : MonoBehaviour {
     public Tile cornerSilenceOut;
     private int collapsingBranchSize;
     public Tile silenceEndpoint;
+    public Tile elimTile;
+    private Vector2Int[] elims;
 
     public void startPath(Vector2Int move) {
         head = new Node(null, Vector2Int.zero);
@@ -139,6 +146,28 @@ public class Path : MonoBehaviour {
         head = new Node(null, Vector2Int.zero);
         tails = new Node[1] {new Node(head, move)};
         nodeCount = 2;
+        this.startingPosition = startingPosition;
+    }
+
+    public void startPath(Vector2Int move, NumberGrid grid) {
+        head = new Node(null, Vector2Int.zero);
+        tails = new Node[1] {new Node(head, move)};
+        grid.update(move);
+        tails[0].setGrid(grid);
+        elims = new Vector2Int[] {};
+        nodeCount = 2;
+        reconstructElimDisplay();
+    }
+
+    public void startPath(Vector2Int move, Vector2Int startingPosition, NumberGrid grid) {
+        head = new Node(null, Vector2Int.zero);
+        tails = new Node[1] {new Node(head, move)};
+        grid.update(move);
+        tails[0].setGrid(grid);
+        elims = new Vector2Int[] {};
+        nodeCount = 2;
+        this.startingPosition = startingPosition;
+        reconstructElimDisplay();
     }
 
     public Vector2Int getStartingPosition() {
@@ -156,19 +185,28 @@ public class Path : MonoBehaviour {
     }
 
     public Node extendTail(int i, Vector2Int move, bool silenceIn) {
-        tails[i] = tails[i].addChild(move, silenceIn);
+        Node oldTail = tails[i];
+        tails[i] = oldTail.addChild(move, silenceIn);
+        oldTail.setGrid(null);
         nodeCount += 1;
+        if (elimTilemap != null) {
+            updateElimDisplay();
+        }
         return tails[i];
-        
     }
 
     public Node[] extendTail(int tailsIndex, Vector2Int[] moves) {
+        Node oldTail = tails[tailsIndex];
         Node[] newTails = {};
-        for (int i = 0; i < moves.Length; i++) {
-            newTails.Concat(new Node[] {tails[tailsIndex].addChild(moves[i], true)});
+        foreach (Vector2Int move in moves) {
+            newTails.Concat(new Node[] {oldTail.addChild(move, true)});
             nodeCount += 1;
         }
-        tails = tails.Where(var => var != tails[tailsIndex]).ToArray();
+        tails = tails.Where(var => var != oldTail).ToArray();
+        oldTail.setGrid(null);
+        if (elimTilemap != null) {
+            updateElimDisplay();
+        }
         return newTails;
     }
 
@@ -176,7 +214,7 @@ public class Path : MonoBehaviour {
         head = null;
         tails = new Node[] {};
         nodeCount = 0;
-        tilemap.ClearAllTiles();
+        pathTilemap.ClearAllTiles();
     }
     
     public void setTails(Node[] tails) {
@@ -184,7 +222,7 @@ public class Path : MonoBehaviour {
     }
 
     public Node[] getTails() {
-        return tails;
+        return tails != null ? tails : null;
     }
 
     public void collapseBranch(Node tail) {
@@ -197,6 +235,10 @@ public class Path : MonoBehaviour {
         } else {
             tail.getParent().removeChild(tail);
             removeTail(tail);
+        }
+        reconstructDisplay();
+        if (elimTilemap != null) {
+            reconstructElimDisplay();
         }
     }
 
@@ -214,28 +256,24 @@ public class Path : MonoBehaviour {
     }
 
     public bool isCollision(Vector2Int relativePosition, Node tail) {
-        Debug.Log("Checking for nodes with relativePosition " + relativePosition);
         return isCollisionHelper(relativePosition, tail);
     }
 
     private bool isCollisionHelper(Vector2Int relativePosition, Node node) {
         if (node.getRelativePosition() == relativePosition) {
-            Debug.Log("Node at relative position " + relativePosition + " found");
             return true;
         } else if (node.getParent() == null) {
-            Debug.Log("Head reached, no collisions found!");
             return false;
         }
-        Debug.Log("Node with move " + node.getMove() + " has relative position " + node.getRelativePosition());
         return isCollisionHelper(relativePosition, node.getParent());
     }
 
     public void updateDisplay(Vector2Int move, Vector2Int position) {
-        tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), start);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
+        pathTilemap.SetTile(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), start);
+        pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
         Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
-        tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpoint);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
+        pathTilemap.SetTile(pathTilemap.WorldToCell(targetPosition), endpoint);
+        pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
     }
 
     public void updateDisplay(Vector2Int lastMove, Vector2Int move, Vector2Int position, bool fromSilence, bool toSilence) {
@@ -257,14 +295,14 @@ public class Path : MonoBehaviour {
                 tile = corner;
             }
         }
-        tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
+        pathTilemap.SetTile(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
         int shouldFlip = this.shouldFlip(lastMove, move);
-        // tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns(lastMove, shouldFlip)), Vector3.one));
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * ((quarterTurns(lastMove) + 2 * shouldFlip * (lastMove.x % 2)) % 4)), Vector3.one));
+        // pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * quarterTurns(lastMove, shouldFlip)), Vector3.one));
+        pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlip, 90 * ((quarterTurns(lastMove) + 2 * shouldFlip * (lastMove.x % 2)) % 4)), Vector3.one));
         Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
         Tile endpointTile = toSilence ? silenceEndpoint : endpoint;
-        tilemap.SetTile(tilemap.WorldToCell(targetPosition), endpointTile);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
+        pathTilemap.SetTile(pathTilemap.WorldToCell(targetPosition), endpointTile);
+        pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(move)), Vector3.one));
     }
 
     public void updateDisplay(Vector2Int lastMove, Vector2Int[] moves, Vector2Int position) {
@@ -278,17 +316,17 @@ public class Path : MonoBehaviour {
             tile = branching;
             shouldFlipBranch = shouldFlip(lastMove, moves);
         }
-        tilemap.SetTile(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
-        tilemap.SetTransformMatrix(tilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * ((quarterTurns(lastMove) + 2 * shouldFlipBranch * (lastMove.x % 2)) % 4)), Vector3.one));
-        for (int i = 0; i < moves.Length; i++) {
-            Vector3Int targetPosition = new Vector3Int(position.x + moves[i].x, position.y + moves[i].y, 0);
-            tilemap.SetTile(tilemap.WorldToCell(targetPosition), silenceEndpoint);
-            tilemap.SetTransformMatrix(tilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(moves[i].x, moves[i].y))), Vector3.one));
+        pathTilemap.SetTile(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), tile);
+        pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(new Vector3Int(position.x, position.y, 0)), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 180 * shouldFlipBranch, 90 * ((quarterTurns(lastMove) + 2 * shouldFlipBranch * (lastMove.x % 2)) % 4)), Vector3.one));
+        foreach (Vector2Int move in moves) {
+            Vector3Int targetPosition = new Vector3Int(position.x + move.x, position.y + move.y, 0);
+            pathTilemap.SetTile(pathTilemap.WorldToCell(targetPosition), silenceEndpoint);
+            pathTilemap.SetTransformMatrix(pathTilemap.WorldToCell(targetPosition), Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, 0, 90 * quarterTurns(new Vector2Int(move.x, move.y))), Vector3.one));
         }
     }
 
     public void reconstructDisplay() {
-        tilemap.ClearAllTiles();
+        pathTilemap.ClearAllTiles();
         updateDisplay(head.getMove(), startingPosition);
         reconstructDisplayHelper(head);
     }
@@ -299,17 +337,43 @@ public class Path : MonoBehaviour {
             updateDisplay(parent.getMove(), children[0].getMove(), startingPosition + parent.getRelativePosition(), children[0].getSilenceIn(), children[0].getSilenceOut());
         } else if (children.Length > 1) {
             Vector2Int[] moves = {};
-            for (int i = 0; i < children.Length; i++) {
-                moves.Append(children[i].getMove());
+            foreach (Node child in children) {
+                moves.Append(child.getMove());
             }
             updateDisplay(parent.getMove(), moves, startingPosition + parent.getRelativePosition());
         } else {
             return 0;
         }
-        for (int i = 0; i < children.Length; i++) {
-            reconstructDisplayHelper(children[i]);
+        foreach (Node child in children) {
+            reconstructDisplayHelper(child);
         }
         return 1;
+    }
+
+    public void updateElimDisplay() {
+        int mapHeight = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>().mapHeight;
+        int mapWidth = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>().mapWidth;
+        for (int x = 1; x <= mapWidth; x++) {
+            for (int y = 1; y <= mapHeight; y++) {
+                Vector2Int newElim = new Vector2Int(x - 5, y - 5);
+                bool update = true;
+                foreach (Node tail in tails) {
+                    if (tail.getGrid().getValue(x, y) != 1) {
+                        update = false;
+                    }
+                }
+                if (update && !elims.Contains(newElim)) {
+                    Debug.Log("Setting ElimTile at (" + x + ", " + y + ")");
+                    elimTilemap.SetTile(elimTilemap.WorldToCell(new Vector3(newElim.x, -newElim.y)), elimTile);
+                    elims.Append(newElim);
+                }
+            };
+        };
+    }
+
+    public void reconstructElimDisplay() {
+        elimTilemap.ClearAllTiles();
+        updateElimDisplay();
     }
 
     public int quarterTurns(Vector2Int move) {

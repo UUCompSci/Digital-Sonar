@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MoveTarget
   - TurnScreen
+  - WinScreen
   layers:
   - Default
   - TransparentFX

@@ -13,6 +13,7 @@ public class SilenceMoveTarget : MonoBehaviour
         PlayerController player = submarine.GetComponent<PlayerController>();
         SubmarineLogicScript logicScript = submarine.GetComponentInChildren<SubmarineLogicScript>();
         GameLogicManager gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
+        gameManager.spendAction(player);
         logicScript.useEnergy(gameManager.getSilenceEnergyCost());
         Vector2Int targetPosition = new Vector2Int((int)gameObject.transform.position.x, (int)gameObject.transform.position.y);
         player.Move(submarine.GetComponentInChildren<SubmarineLogicScript>(), targetPosition, "...");

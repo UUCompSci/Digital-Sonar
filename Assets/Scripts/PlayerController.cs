@@ -40,7 +40,8 @@ public class PlayerController : MonoBehaviour
         movePoint.SetParent(null);
         gameLogicManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>();
         reportee = gameLogicManager.getOpponentRadioOperator(this);
-        classicSonarPrompt.gameObject.transform.SetParent(null);
+        classicSonarPrompt.gameObject.transform.SetParent(gameLogicManager.getUIManager(this).transform);
+        classicSonarPrompt.gameObject.SetActive(false);
         torpedoMenu.gameObject.GetComponentInChildren<TorpedoMenu>().parentSub = this;
         torpedoMenu.gameObject.transform.SetParent(null);
 
@@ -83,8 +84,6 @@ public class PlayerController : MonoBehaviour
         bool result2 = false;
         if (path.nodeCount != 0) {
             Path.Node tail = path.getTails()[0];
-            Debug.Log("target relativePosition.x: " + transform.position.x + move.x);
-            Debug.Log("target relativePosition.y: " + transform.position.y + move.y);
             result2 = path.isCollision(new Vector2Int(targetPosition.x - path.getStartingPosition().x, targetPosition.y - path.getStartingPosition().y), tail);
         }
         Tile tile = (Tile)islandMap.GetTile(islandMap.WorldToCell(new Vector3Int(targetPosition.x, targetPosition.y, 0)));

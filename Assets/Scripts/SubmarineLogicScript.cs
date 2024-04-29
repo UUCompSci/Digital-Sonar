@@ -44,9 +44,7 @@ public class SubmarineLogicScript : MonoBehaviour
         if (n > 0) {
             energy += n;
             energyGauge.displayEnergyGain(n);
-        } else {
-            Debug.Log("gainEnergy only accepts positive integer values, try again.");
-        };
+        }
     }
 
     public int getEnergy() {
@@ -59,7 +57,8 @@ public class SubmarineLogicScript : MonoBehaviour
 
     public void setPath(Vector2Int move) {
         Path newPath = path.gameObject.AddComponent<Path>();
-        newPath.tilemap = path.tilemap;
+        newPath.pathTilemap = path.pathTilemap;
+        newPath.elimTilemap = path.elimTilemap;
         newPath.straight = path.straight;
         newPath.corner = path.corner;
         newPath.endpoint = path.endpoint;
@@ -80,7 +79,8 @@ public class SubmarineLogicScript : MonoBehaviour
     public void setPath(Vector2Int move, Vector2Int startingPosition) {
         Path newPath = path.gameObject.AddComponent<Path>();
         newPath.setStartingPosition(startingPosition);
-        newPath.tilemap = path.tilemap;
+        newPath.pathTilemap = path.pathTilemap;
+        newPath.elimTilemap = path.elimTilemap;
         newPath.straight = path.straight;
         newPath.corner = path.corner;
         newPath.endpoint = path.endpoint;
@@ -93,13 +93,14 @@ public class SubmarineLogicScript : MonoBehaviour
         newPath.cornerSilenceIn = path.cornerSilenceIn;
         newPath.cornerSilenceOut = path.cornerSilenceOut;
         newPath.silenceEndpoint = path.silenceEndpoint;
+        newPath.elimTile = path.elimTile;
         newPath.startPath(move);
         Destroy(path);
         path = newPath;
     }
 
-    public Path getPath() {
-        return path;
+    public ref Path getPath() {
+        return ref path;
     }
 
     public void clearPath() {
@@ -107,10 +108,10 @@ public class SubmarineLogicScript : MonoBehaviour
     }
 
     public int dealDamage(int damage) {
-        if (damage > health) {
-            damage = health;
-            
+        Debug.Log("dealing " + damage + " damage");
+        if (damage >= health) {
             health = 0;
+            GameObject.FindGameObjectWithTag("GameController").GetComponent<GameLogicManager>().declareLoss(transform.parent.GetComponent<PlayerController>());
         } else if (damage > 0) {
             health -= damage;
         }

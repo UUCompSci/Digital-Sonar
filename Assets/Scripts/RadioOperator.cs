@@ -27,7 +27,7 @@ public class RadioOperator : MonoBehaviour
 
     public int reportMove(Vector2Int move) {
         if (path.nodeCount == 0) {
-            path.startPath(move);
+            path.startPath(move, new NumberGrid());
             path.updateDisplay(move, new Vector2Int((int)path.transform.position.x, (int)path.transform.position.y));
         } else {
             Path.Node[] tails = path.getTails();
@@ -42,7 +42,6 @@ public class RadioOperator : MonoBehaviour
                 }
                 Vector2Int targetRelativePosition = new Vector2Int(oldPosition.x + move.x, oldPosition.y + move.y);
                 if (tail.getGrid() == null) {
-                    NumberGrid.setIslands(islands);
                     tail.setGrid(new NumberGrid());
                 }
                 tail.getGrid().update(targetRelativePosition);
@@ -62,8 +61,7 @@ public class RadioOperator : MonoBehaviour
     public int reportMove() {
         Path.Node[] tails = path.getTails();
         int tailsLength = tails.Length;
-        for (int i = 0; i < tailsLength; i++) {
-            Path.Node tail = tails[i];
+        foreach (Path.Node tail in tails) {
             Vector2Int lastMove = tail.getMove();
             Vector2Int[] moveList = new Vector2Int[] {new Vector2Int(lastMove.x, lastMove.y), new Vector2Int(lastMove.y, -lastMove.x), new Vector2Int(-lastMove.y, lastMove.x)};
             Vector2Int[] validMoveList = {};
@@ -77,7 +75,6 @@ public class RadioOperator : MonoBehaviour
                 Vector2Int move = new Vector2Int(moveList[0].x,moveList[0].y);
                 Vector2Int targetRelativePosition = new Vector2Int(oldPosition.x + move.x, oldPosition.y + move.y);
                 if (tail.getGrid() == null) {
-                    NumberGrid.setIslands(islands);
                     tail.setGrid(new NumberGrid());
                 }
                 NumberGrid gridCopy = new NumberGrid(tail.getGrid());
@@ -110,21 +107,21 @@ public class RadioOperator : MonoBehaviour
         Path.Node[] tails = path.getTails();
         switch (positionType) {
             case "row":
-                for (int i = 0; i < tails.Length; i++) {
-                    int startingRow = position - tails[i].getRelativePosition().x;
-                    for (int n = 0; n < tails[i].getGrid().mapHeight; n++) {
+                foreach (Path.Node tail in tails) {
+                    int startingRow = position - tail.getRelativePosition().x;
+                    for (int n = 0; n < gameLogicManager.mapHeight; n++) {
                         if (n != startingRow) {
-                            tails[i].getGrid().eliminateRow(n);
+                            tail.getGrid().eliminateRow(n);
                         }
                     }
                 }
                 break;
             case "column":
-                for (int i = 0; i < tails.Length; i++) {
-                    int startingColumn = position - tails[i].getRelativePosition().y;
-                    for (int n = 0; n < tails[i].getGrid().mapWidth; n++) {
+                foreach (Path.Node tail in tails) {
+                    int startingColumn = position + tail.getRelativePosition().y;
+                    for (int n = 0; n < gameLogicManager.mapWidth; n++) {
                         if (n != startingColumn) {
-                            tails[i].getGrid().eliminateColumn(n);
+                            tail.getGrid().eliminateColumn(n);
                         }
                     }
                 }

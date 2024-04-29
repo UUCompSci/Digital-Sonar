@@ -10,19 +10,6 @@ public class UIManager : MonoBehaviour
     public GameObject silenceButton;
     public GameObject sonarButton;
 
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public GameObject getTorpedoButton() {
         return torpedoButton;
     }

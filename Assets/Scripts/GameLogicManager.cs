@@ -12,6 +12,7 @@ public class GameLogicManager : MonoBehaviour
     public PlayerController[] turnList;
     public RadioOperator[] radioOperators;
     public GameObject[] turnScreens;
+    public GameObject[] winScreens;
     public UIManager[] UIList;
     public Tilemap[] tilemaps;
     public int mapWidth;
@@ -28,14 +29,6 @@ public class GameLogicManager : MonoBehaviour
     public int indirectHitRange;
     public bool safeTorpedoes;
     public bool safeMines;
-    private enum gameState {
-        WON,
-        CONTINUE,
-        PAUSED,
-        QUIT
-    };
-
-    private gameState gameStateTracker = gameState.CONTINUE;
 
 
 
@@ -45,6 +38,10 @@ public class GameLogicManager : MonoBehaviour
         turnScreens = GameObject.FindGameObjectsWithTag("TurnScreen");
         for (int i = 1; i < turnScreens.Length; i++) {
             turnScreens[i].SetActive(false);
+        }
+        winScreens = GameObject.FindGameObjectsWithTag("WinScreen");
+        foreach (GameObject winScreen in winScreens) {
+            winScreen.SetActive(false);
         }
     }
 
@@ -56,11 +53,14 @@ public class GameLogicManager : MonoBehaviour
         return radioOperators[(System.Array.IndexOf(turnList, queryingPlayer) + 1) % turnList.Length];
     }
 
+    public UIManager getUIManager(PlayerController player) {
+        return UIList[System.Array.IndexOf(turnList, player)];
+    }
+
     public void endCurrentTurn() {
+        turnList[turnTracker].clearCanvas();
         turnTracker = (turnTracker + 1) % turnList.Length;
-        if (gameStateTracker != gameState.WON) {
-            turnScreens[turnTracker].SetActive(true);
-        };
+        turnScreens[turnTracker].SetActive(true);
     }
 
     public void spendAction(PlayerController queryingPlayer) {
@@ -71,18 +71,27 @@ public class GameLogicManager : MonoBehaviour
         buttonManager.getSonarButton().GetComponent<Button>().interactable = false;
     }
 
-    public void endCurrentTurn(PlayerController opponent) {
-        endCurrentTurn();
-        opponent.gameObject.GetComponentInChildren<Canvas>().enabled = true;
-        
-    }
-
     public void startTurn(int i) {
         PlayerController player = turnList[i];
         SubmarineLogicScript logicScript = player.gameObject.GetComponentInChildren<SubmarineLogicScript>();
         UIManager buttonManager = UIList[i];
-        UIList[i].gameObject.SetActive(true);
-        UIList[(i + 1) % turnList.Length].gameObject.SetActive(false);
+        buttonManager.getSurfaceButton().GetComponent<Button>().interactable = true;
+        buttonManager.gameObject.GetComponent<Canvas>().enabled = true;
+        buttonManager.GetComponentInChildren<ViewSwapper>().radioOperatorPath.enabled = true;
+        foreach (SpriteRenderer slot in buttonManager.gameObject.GetComponentInChildren<EnergyGauge>().energyGaugeSlots) {
+            slot.enabled = true;
+        }
+        foreach (SpriteRenderer notch in buttonManager.gameObject.GetComponentInChildren<HealthBar>().healthBarNotches) {
+            notch.enabled = true;
+        }
+        GameObject lastTurnButtonsManagerObject = UIList[(i + 1) % turnList.Length].gameObject;
+        lastTurnButtonsManagerObject.GetComponent<Canvas>().enabled = false;
+        foreach (SpriteRenderer slot in lastTurnButtonsManagerObject.GetComponentInChildren<EnergyGauge>().energyGaugeSlots) {
+            slot.enabled = false;
+        }
+        foreach (SpriteRenderer notch in lastTurnButtonsManagerObject.GetComponentInChildren<HealthBar>().healthBarNotches) {
+            notch.enabled = false;
+        }
         if (logicScript.getEnergy() >= silenceEnergyCost) {
             buttonManager.getSilenceButton().GetComponent<Button>().interactable = true;
         } else {
@@ -99,11 +108,11 @@ public class GameLogicManager : MonoBehaviour
             buttonManager.getSonarButton().GetComponent<Button>().interactable = false;
         }
         tilemaps[i].GetComponent<TilemapRenderer>().enabled = true;
-        tilemaps[(i + 1) % turnList.Length].GetComponent<TilemapRenderer>().enabled = false;
-        player.gameObject.SetActive(true);
-        turnList[(i + 1) % turnList.Length].gameObject.SetActive(false);
-        radioOperators[i].GetComponentInChildren<Grid>().gameObject.GetComponentInChildren<TilemapRenderer>().enabled = true;
-        radioOperators[(i + 1) % turnList.Length].GetComponentInChildren<Grid>().gameObject.GetComponentInChildren<TilemapRenderer>().enabled = false;
+        tilemaps[(i + 1) % tilemaps.Length].GetComponent<TilemapRenderer>().enabled = false;
+        player.gameObject.GetComponent<SpriteRenderer>().enabled = true;
+        turnList[(i + 1) % turnList.Length].gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        UIList[(i + 1) % turnList.Length].gameObject.GetComponentInChildren<ViewSwapper>().radioOperatorPath.enabled = false;
+        UIList[(i + 1) % turnList.Length].gameObject.GetComponentInChildren<ViewSwapper>().radioOperatorStartsGrid.enabled = false;
         player.displayMoveOptions();
         turnScreens[i].SetActive(false);
     }
@@ -120,13 +129,13 @@ public class GameLogicManager : MonoBehaviour
         // trigger animation
         foreach (PlayerController sub in turnList) {
             if (sub != safeSub || !safeExplosion) {
-                SubmarineLogicScript logicScript = sub.gameObject.GetComponent<SubmarineLogicScript>();
-                if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.parent.position.x) <= directHitRange 
-                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.parent.position.y) <= directHitRange) {
+                SubmarineLogicScript logicScript = sub.gameObject.GetComponentInChildren<SubmarineLogicScript>();
+                if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.position.x) <= directHitRange 
+                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.position.y) <= directHitRange) {
                     Debug.Log($"Direct hit! {directHitDamage} damage dealt!");
                     logicScript.dealDamage(directHitDamage);
-                } else if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.parent.position.x) <= indirectHitRange 
-                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.parent.position.y) <= indirectHitRange) {
+                } else if (System.Math.Abs(targetPosition.x - sub.gameObject.transform.position.x) <= indirectHitRange 
+                && System.Math.Abs(targetPosition.y - sub.gameObject.transform.position.y) <= indirectHitRange) {
                     Debug.Log($"Indirect hit! {indirectHitDamage} damage dealt!");
                     logicScript.dealDamage(indirectHitDamage);
                 } else {
@@ -134,5 +143,9 @@ public class GameLogicManager : MonoBehaviour
                 };
             }
         }
+    }
+
+    public void declareLoss(PlayerController player) {
+        winScreens[(System.Array.IndexOf(turnList, player) + 1) % turnList.Length].SetActive(true);
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class EnergyGauge : MonoBehaviour
 {
-    int energy;
+    [SerializeField] private int energy;
     Color fullColor = Color.green;
     Color emptyColor = Color.red;
 
@@ -15,12 +15,6 @@ public class EnergyGauge : MonoBehaviour
     void Start()
     {
         energy = 0;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void displayEnergyGain(int energyGain) {

@@ -16,18 +16,21 @@ public class TorpedoMenu : MonoBehaviour
     }
 
     public void fireTorpedo() {
+        parentSub.GetComponentInChildren<SubmarineLogicScript>().useEnergy(gameLogicManager.torpedoEnergyCost);
+        gameLogicManager.spendAction(parentSub);
         if (targetPosition.x < 0 || targetPosition.y < 0) {
             warningMessage.enabled = true;
             return;
         }
+        parentSub.clearCanvas();
         gameLogicManager.createExplosion(targetPosition, parentSub, gameLogicManager.safeTorpedoes);
     }
 
-    public void setTargetPosition_x(string x) {
-        targetPosition.x = System.Convert.ToInt32(x);
+    public void setTargetPosition_x() {
+        targetPosition.x = System.Convert.ToInt32(gameObject.transform.GetChild(1).gameObject.GetComponent<TMP_InputField>().text);
     }
 
-    public void setTargetPosition_y(string y) {
-        targetPosition.y = System.Convert.ToInt32(y);
+    public void setTargetPosition_y() {
+        targetPosition.y = System.Convert.ToInt32(gameObject.transform.GetChild(2).gameObject.GetComponent<TMP_InputField>().text);
     }
 }
