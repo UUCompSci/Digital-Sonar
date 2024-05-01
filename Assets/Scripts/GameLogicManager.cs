@@ -126,8 +126,9 @@ public class GameLogicManager : MonoBehaviour
         return silenceEnergyCost;
     }
 
-    public int[] createExplosion(Vector3Int targetPosition, PlayerController safeSub, bool safeExplosion) {
+    public void createExplosion(Vector3Int targetPosition, PlayerController safeSub, bool safeExplosion) {
         // trigger animation
+        RadioOperator reportee = radioOperators[System.Array.IndexOf(turnList, safeSub)];
         foreach (PlayerController sub in turnList) {
             if (sub != safeSub || !safeExplosion) {
                 Vector3Int subPosition = new Vector3Int((int) sub.transform.position.x, (int) sub.transform.position.y);
@@ -138,15 +139,15 @@ public class GameLogicManager : MonoBehaviour
                 && System.Math.Abs(targetPosition.y - subPosition.y) <= directHitRange) {
                     Debug.Log($"Direct hit! {directHitDamage} damage dealt!");
                     logicScript.dealDamage(directHitDamage);
-                    return new int[2] {directHitRange, 1};
+                    reportee.reportTorpedo(new Vector2Int(targetPosition.x + 5, targetPosition.y + 6), directHitRange, true);
                 } else if (System.Math.Abs(targetPosition.x - subPosition.x) <= indirectHitRange 
                 && System.Math.Abs(targetPosition.y - subPosition.y) <= indirectHitRange) {
                     Debug.Log($"Indirect hit! {indirectHitDamage} damage dealt!");
                     logicScript.dealDamage(indirectHitDamage);
-                    return new int[2] {indirectHitRange, 1};
+                    reportee.reportTorpedo(new Vector2Int(targetPosition.x + 5, targetPosition.y + 6), indirectHitRange, true);
                 } else {
                     Debug.Log("Miss! No damage dealt");
-                    return new int[2] {indirectHitRange, 0};
+                    reportee.reportTorpedo(new Vector2Int(targetPosition.x + 5, targetPosition.y + 6), indirectHitRange, false);
                 }
             }
         }

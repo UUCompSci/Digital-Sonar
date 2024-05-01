@@ -143,7 +143,7 @@ public class RadioOperator : MonoBehaviour
         
     }
 
-    public void reportTorpedo(Vector2Int targetPosition, int[] hitType) {
+    public void reportTorpedo(Vector2Int targetPosition, int hitRange, bool isHit) {
         // to be implemented later
     }
 }
